@@ -13,8 +13,6 @@
 module Mail
   class ReferencesField < StructuredField
     
-    include CommonMessageId
-    
     FIELD_NAME = 'references'
     
     def initialize(*args)
