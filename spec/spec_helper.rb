@@ -1,9 +1,14 @@
 # encoding: utf-8
+
 unless defined?(MAIL_ROOT)
   STDERR.puts("Running Specs under Ruby Version #{RUBY_VERSION}")
-
   MAIL_ROOT = File.join(File.dirname(__FILE__), '../')
 end
+
+unless defined?(SPEC_ROOT)
+  SPEC_ROOT = File.join(File.dirname(__FILE__))
+end
+
 require 'rubygems'
 require 'ruby-debug' if RUBY_VERSION < '1.9'
 require 'spec'
@@ -22,7 +27,7 @@ Spec::Runner.configure do |config|
 end
 
 def fixture(name)
-  File.join(File.dirname(__FILE__), 'fixtures', name)
+  File.join(SPEC_ROOT, 'fixtures', name)
 end
 
 alias doing lambda
@@ -39,32 +44,3 @@ def ascii(from = 33, to = 126)
     ('P'..'Y').to_a + ('1'..'4').to_a + ('6'..'8').to_a
   chars - boring
 end
-
-# Original mockup from ActionMailer
-class MockSMTP
-  def self.deliveries
-    @@deliveries
-  end
-
-  def initialize
-    @@deliveries = []
-  end
-
-  def sendmail(mail, from, to)
-    @@deliveries << [mail, from, to]
-  end
-
-  def start(*args)
-    yield self
-  end
-  
-  def enable_starttls
-    true
-  end
-end
-class Net::SMTP
-  def self.new(*args)
-    MockSMTP.new
-  end
-end
-
