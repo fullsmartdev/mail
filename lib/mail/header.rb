@@ -19,7 +19,6 @@ module Mail
   class Header
     include Patterns
     include Utilities
-    include Enumerable
     
     # Creates a new header object.
     # 

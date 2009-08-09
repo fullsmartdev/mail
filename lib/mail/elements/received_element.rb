@@ -5,8 +5,8 @@ module Mail
     include Mail::Utilities
     
     def initialize( string )
-      parser = Mail::ReceivedParser.new
-      if tree = parser.parse(string)
+      tree = Mail::ReceivedParser.new.parse(string)
+      if tree
         @date_time = ::DateTime.parse("#{tree.date_time.date.text_value} #{tree.date_time.time.text_value}")
         @info = tree.name_val_list.text_value
       else
