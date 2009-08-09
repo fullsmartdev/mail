@@ -46,7 +46,8 @@ module Mail
     
     include Patterns
     include Utilities
-    include Deliverable
+    include Sendable
+    include RetrieveViaPop3
     
     # Creates a new Mail::Message object through .new
     def initialize(*args, &block)
@@ -74,25 +75,12 @@ module Mail
     def raw_source=(value)
       @raw_source = value.to_crlf
     end
-    require 'ruby-debug'
-    def set_envelope( val )
-      @raw_envelope = val
-      @envelope = Mail::Envelope.new( val )
-    end
     
     # The raw_envelope is the From mikel@test.lindsaar.net Mon May  2 16:07:05 2009
     # type field that you can see at the top of any email that has come
     # from a mailbox
     def raw_envelope
       @raw_envelope
-    end
-    
-    def envelope_from
-      @envelope ? @envelope.from : nil
-    end
-    
-    def envelope_date
-      @envelope ? @envelope.date : nil
     end
     
     # Sets the header of the message object.
@@ -297,26 +285,16 @@ module Mail
       #:startdoc:
     end 
 
-    # Returns an FieldList of all the fields in the header in the order that
-    # they appear in the header
     def header_fields
       header.fields
     end
 
-    # Returns true if the message has a message ID field, the field may or may
-    # not have a value, but the field exists or not.
     def has_message_id?
       header.has_message_id?
     end
-
-    # Creates a new empty Message-ID field and inserts it in the correct order
-    # into the Header.  The MessageIdField object will automatically generate
-    # a unique message ID if you try and encode it or output it to_s without
-    # specifying a message id.
-    # 
-    # It will preserve the message ID you specify if you do.
-    def add_message_id(msg_id = nil)
-      header.fields << MessageIdField.new(msg_id)
+    
+    def add_message_id
+      header.fields << MessageIdField.new
     end
     
     # Outputs an encoded string representation of the mail message including
@@ -352,9 +330,18 @@ module Mail
     
     def set_envelope_header
       if match_data = raw_source.match(/From\s(#{TEXT}+)#{CRLF}(.*)/m)
-        set_envelope(match_data[1])
+        @raw_envelope   = match_data[1]
         self.raw_source = match_data[2]
       end
+    end
+
+    class << self
+
+      # Only POP3 is supported for now
+      def get_all_mail(&block)
+        self.pop3_get_all_mail(&block)
+      end
+
     end
 
   end
