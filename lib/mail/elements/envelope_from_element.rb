@@ -1,25 +1,29 @@
 # encoding: utf-8
 module Mail
-  class ReceivedElement
+  class EnvelopeFromElement
     
     include Mail::Utilities
     
     def initialize( string )
-      parser = Mail::ReceivedParser.new
-      if tree = parser.parse(string)
-        @date_time = ::DateTime.parse("#{tree.date_time.date.text_value} #{tree.date_time.time.text_value}")
-        @info = tree.name_val_list.text_value
+      parser = Mail::EnvelopeFromParser.new
+      if @tree = parser.parse(string)
+        @address = tree.addr_spec.text_value.strip
+        @date_time = ::DateTime.parse("#{tree.ctime_date.text_value}")
       else
         raise Mail::Field::ParseError, "Can not parse |#{string}|\nReason was: #{parser.failure_reason}\n"
       end
+    end
+    
+    def tree
+      @tree
     end
     
     def date_time
       @date_time
     end
     
-    def info
-      @info
+    def address
+      @address
     end
     
     def to_s(*args)
