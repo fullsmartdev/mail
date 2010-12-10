@@ -1,5 +1,8 @@
 # encoding: utf-8
-require File.dirname(__FILE__) + '/../../spec_helper'
+require 'spec_helper'
+# 
+# reply-to        =       "Reply-To:" address-list CRLF
+# 
 
 describe Mail::ReplyToField do
   
@@ -10,22 +13,16 @@ describe Mail::ReplyToField do
     end
 
     it "should mix in the CommonAddress module" do
-      Mail::ReplyToField.included_modules.should include(Mail::CommonAddress::InstanceMethods) 
+      Mail::ReplyToField.included_modules.should include(Mail::CommonAddress) 
     end
 
-    it "should aReplyToept two strings with the field separate" do
-      t = Mail::ReplyToField.new('Reply-To', 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
-      t.name.should == 'Reply-To'
-      t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
-    end
-
-    it "should aReplyToept a string with the field name" do
+    it "should accept a string with the field name" do
       t = Mail::ReplyToField.new('Reply-To: Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
       t.name.should == 'Reply-To'
       t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
     end
 
-    it "should aReplyToept a string without the field name" do
+    it "should accept a string without the field name" do
       t = Mail::ReplyToField.new('Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
       t.name.should == 'Reply-To'
       t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
@@ -56,12 +53,12 @@ describe Mail::ReplyToField do
     
     it "should return the formatted line on to_s" do
       t = Mail::ReplyToField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.to_s.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
+      t.value.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
     end
     
     it "should return the encoded line" do
       t = Mail::ReplyToField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.encoded.should == "Reply-To: sam@me.com, my_group: mikel@me.com, bob@you.com;\r\n"
+      t.encoded.should == "Reply-To: sam@me.com, \r\n\smy_group: mikel@me.com, \r\n\sbob@you.com;\r\n"
     end
     
   end

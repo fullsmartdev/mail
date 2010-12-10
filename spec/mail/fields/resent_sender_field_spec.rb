@@ -1,5 +1,7 @@
 # encoding: utf-8
-require File.dirname(__FILE__) + '/../../spec_helper'
+require 'spec_helper'
+# 
+# resent-sender   =       "Resent-Sender:" mailbox CRLF
 
 describe Mail::ResentSenderField do
   
@@ -10,22 +12,16 @@ describe Mail::ResentSenderField do
     end
 
     it "should mix in the CommonAddress module" do
-      Mail::ResentSenderField.included_modules.should include(Mail::CommonAddress::InstanceMethods) 
+      Mail::ResentSenderField.included_modules.should include(Mail::CommonAddress) 
     end
 
-    it "should aResentSenderept two strings with the field separate" do
-      t = Mail::ResentSenderField.new('Resent-Sender', 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
-      t.name.should == 'Resent-Sender'
-      t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
-    end
-
-    it "should aResentSenderept a string with the field name" do
+    it "should accept a string with the field name" do
       t = Mail::ResentSenderField.new('Resent-Sender: Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
       t.name.should == 'Resent-Sender'
       t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
     end
 
-    it "should aResentSenderept a string without the field name" do
+    it "should accept a string without the field name" do
       t = Mail::ResentSenderField.new('Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
       t.name.should == 'Resent-Sender'
       t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
@@ -48,7 +44,7 @@ describe Mail::ResentSenderField do
     
     it "should return the formatted line on to_s" do
       t = Mail::ResentSenderField.new('Mikel Lindsaar <mikel@test.lindsaar.net>')
-      t.to_s.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>'
+      t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>'
     end
     
     it "should return the encoded line" do

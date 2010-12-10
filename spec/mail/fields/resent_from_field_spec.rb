@@ -1,5 +1,7 @@
 # encoding: utf-8
-require File.dirname(__FILE__) + '/../../spec_helper'
+require 'spec_helper'
+# 
+# resent-from     =       "Resent-From:" mailbox-list CRLF
 
 describe Mail::ResentFromField do
   
@@ -10,22 +12,16 @@ describe Mail::ResentFromField do
     end
 
     it "should mix in the CommonAddress module" do
-      Mail::ResentFromField.included_modules.should include(Mail::CommonAddress::InstanceMethods) 
+      Mail::ResentFromField.included_modules.should include(Mail::CommonAddress) 
     end
 
-    it "should aResentFromept two strings with the field separate" do
-      t = Mail::ResentFromField.new('Resent-From', 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
-      t.name.should == 'Resent-From'
-      t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
-    end
-
-    it "should aResentFromept a string with the field name" do
+    it "should accept a string with the field name" do
       t = Mail::ResentFromField.new('Resent-From: Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
       t.name.should == 'Resent-From'
       t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
     end
 
-    it "should aResentFromept a string without the field name" do
+    it "should accept a string without the field name" do
       t = Mail::ResentFromField.new('Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
       t.name.should == 'Resent-From'
       t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
@@ -56,12 +52,12 @@ describe Mail::ResentFromField do
     
     it "should return the formatted line on to_s" do
       t = Mail::ResentFromField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.to_s.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
+      t.value.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
     end
     
     it "should return the encoded line" do
       t = Mail::ResentFromField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.encoded.should == "Resent-From: sam@me.com, my_group: mikel@me.com, bob@you.com;\r\n"
+      t.encoded.should == "Resent-From: sam@me.com, \r\n\smy_group: mikel@me.com, \r\n\sbob@you.com;\r\n"
     end
     
   end

@@ -31,6 +31,14 @@ module Mail
       [\x09\x20]
     end
   
+    rule FWS    # Folding white space
+      (WSP* CRLF WSP+) / (CRLF WSP+) / obs_FWS
+    end
+
+    rule CFWS
+      (FWS* comment)* FWS?
+    end
+
     rule NO_WS_CTL
       [\x01-\x08]   /         # US-ASCII control characters
       [\x0B-\x0C]   /         #  that do not include the
@@ -46,14 +54,6 @@ module Mail
       "@" / '\\' /
       "," / "." /
       DQUOTE
-    end
-
-    rule FWS    # Folding white space
-      (WSP* CRLF WSP+) / (CRLF WSP+) / obs_FWS
-    end
-
-    rule CFWS
-      (FWS* comment)* FWS?
     end
 
     rule ctext
@@ -84,6 +84,10 @@ module Mail
       "|" / "}" /
       "~"
     end
+    
+    rule mtext
+      (atext / ".")+
+    end
 
     rule atom
       CFWS? atext+ CFWS?
@@ -95,6 +99,10 @@ module Mail
   
     rule local_dot_atom
       CFWS? local_dot_atom_text CFWS?
+    end
+    
+    rule message_id_text
+      mtext+
     end
     
     rule dot_atom_text
@@ -120,6 +128,10 @@ module Mail
       [\x47-\x5b] /   # or the "." or the 
       [\x5d-\x7e]     # double quote character
     end
+
+    rule phrase
+      obs_phrase / word+
+    end
     
     rule word
       atom / quoted_string
@@ -127,10 +139,6 @@ module Mail
     
     rule phrase_list
       first_phrase:phrase other_phrases:("," FWS* phrase_value:phrase)*
-    end
-  
-    rule phrase
-      word+ / obs_phrase
     end
 
     rule domain_literal
@@ -174,8 +182,9 @@ module Mail
         end
       }
     end
+
     rule quoted_string
-      CFWS? DQUOTE (FWS? qcontent)+ FWS? DQUOTE CFWS?
+      CFWS? DQUOTE quoted_content:(FWS? qcontent)+ FWS? DQUOTE CFWS?
     end
 
     rule qcontent
@@ -256,7 +265,7 @@ module Mail
     end
   
     rule address_list
-      first_addr:address other_addr:("," FWS* addr_value:address)*
+      first_addr:address? other_addr:(FWS* "," FWS* addr_value:address?)*
     end
     
     rule date_time
@@ -347,7 +356,7 @@ module Mail
     end
 
     rule message_ids
-      first_msg_id:msg_id other_msg_ids:((CFWS)? msg_id_value:msg_id)*
+      first_msg_id:msg_id other_msg_ids:( CFWS msg_id_value:msg_id )*
     end
     
     rule msg_id
@@ -359,11 +368,33 @@ module Mail
     end
     
     rule id_left
-      dot_atom_text / no_fold_quote / obs_id_left
+      message_id_text / no_fold_quote / obs_id_left
     end
     
     rule id_right
-      dot_atom_text / no_fold_literal / obs_id_right
+      msg_id_dot_atom_text / no_fold_literal / obs_id_right
+    end
+    
+    rule msg_id_dot_atom_text
+      (msg_id_domain_text "."?)+
+    end
+
+    rule msg_id_domain_text
+      (DQUOTE (FWS? quoted_domain)+ FWS? DQUOTE) / msg_id_atext+
+    end
+
+    rule msg_id_atext
+      ALPHA / DIGIT / # Any character except controls,
+      "!" / "#" /     #  SP, and specials.
+      "$" / "%" /     #  Used for atoms
+      "&" / "'" /
+      "*" / "+" /
+      "-" / "/" /
+      "=" / "?" /
+      "^" / "_" /
+      "`" / "{" /
+      "|" / "}" /
+      "~" / "@"
     end
 
     rule no_fold_quote
@@ -374,14 +405,6 @@ module Mail
       "[" (dtext / quoted_pair)+ "]"
     end
     
-    rule obs_id_left
-      local_part
-    end
-
-    rule obs_id_right
-      domain
-    end
-
     
   end
 end

@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.dirname(__FILE__) + '/../../spec_helper'
+require 'spec_helper'
 
 describe Mail::ResentDateField do
   it "should initialize" do
@@ -11,28 +11,29 @@ describe Mail::ResentDateField do
   end
   
   it "should mix in the CommonAddress module" do
-    Mail::ResentDateField.included_modules.should include(Mail::CommonDate::InstanceMethods) 
-  end
-
-  it "should accept two strings with the field separate" do
-    t = Mail::ResentDateField.new('Resent-Date', '12 Aug 2009 00:00:02 GMT')
-    t.name.should == 'Resent-Date'
-    t.value.should == '12 Aug 2009 00:00:02 GMT'
-    t.date_time.should == ::DateTime.parse('12 Aug 2009 00:00:02 GMT')
+    Mail::ResentDateField.included_modules.should include(Mail::CommonDate) 
   end
 
   it "should accept a string with the field name" do
     t = Mail::ResentDateField.new('Resent-Date: 12 Aug 2009 00:00:02 GMT')
     t.name.should == 'Resent-Date'
-    t.value.should == '12 Aug 2009 00:00:02 GMT'
+    t.value.should == 'Wed, 12 Aug 2009 00:00:02 +0000'
     t.date_time.should == ::DateTime.parse('12 Aug 2009 00:00:02 GMT')
   end
   
   it "should accept a string without the field name" do
     t = Mail::ResentDateField.new('12 Aug 2009 00:00:02 GMT')
     t.name.should == 'Resent-Date'
-    t.value.should == '12 Aug 2009 00:00:02 GMT'
+    t.value.should == 'Wed, 12 Aug 2009 00:00:02 +0000'
     t.date_time.should == ::DateTime.parse('12 Aug 2009 00:00:02 GMT')
+  end
+  
+  it "should give today's date if no date is specified" do
+    now = Time.now
+    Time.stub!(:now).and_return(now)
+    t = Mail::ResentDateField.new
+    t.name.should == 'Resent-Date'
+    t.date_time.should == ::DateTime.parse(now.to_s)
   end
 
 end

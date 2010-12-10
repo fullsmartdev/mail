@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.dirname(__FILE__) + '/../../spec_helper'
+require 'spec_helper'
 
 describe Mail::KeywordsField do
 
@@ -7,12 +7,6 @@ describe Mail::KeywordsField do
     
     it "should initialize" do
       doing { Mail::KeywordsField.new("this, is, email") }.should_not raise_error
-    end
-    
-    it "should accept two strings with the field separate" do
-      k = Mail::KeywordsField.new('Keywords', 'these are keywords, so there')
-      k.name.should == 'Keywords'
-      k.value.should == 'these are keywords, so there'
     end
     
     it "should accept a string with the field name" do
@@ -55,6 +49,18 @@ describe Mail::KeywordsField do
       k.keywords.should == ['these, are keywords (another comment to be ignored)', 'so there (This is an irrelevant comment)']
     end
     
+  end
+  
+  describe "encoding and decoding" do
+    it "should encode" do
+      k = Mail::KeywordsField.new('these are keywords, so there')
+      k.encoded.should == "Keywords: these are keywords, so there\r\n"
+    end
+
+    it "should decode" do
+      k = Mail::KeywordsField.new('these are keywords, so there')
+      k.decoded.should == "these are keywords, so there"
+    end
   end
   
 end

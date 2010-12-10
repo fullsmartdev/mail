@@ -1,5 +1,7 @@
 # encoding: utf-8
-require File.dirname(__FILE__) + '/../../spec_helper'
+require 'spec_helper'
+# 
+# resent-cc       =       "Resent-Cc:" address-list CRLF
 
 describe Mail::ResentCcField do
   
@@ -10,22 +12,16 @@ describe Mail::ResentCcField do
     end
 
     it "should mix in the CommonAddress module" do
-      Mail::ResentCcField.included_modules.should include(Mail::CommonAddress::InstanceMethods) 
+      Mail::ResentCcField.included_modules.should include(Mail::CommonAddress) 
     end
 
-    it "should aResentCcept two strings with the field separate" do
-      t = Mail::ResentCcField.new('Resent-Cc', 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
-      t.name.should == 'Resent-Cc'
-      t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
-    end
-
-    it "should aResentCcept a string with the field name" do
+    it "should accept a string with the field name" do
       t = Mail::ResentCcField.new('Resent-Cc: Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
       t.name.should == 'Resent-Cc'
       t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
     end
 
-    it "should aResentCcept a string without the field name" do
+    it "should accept a string without the field name" do
       t = Mail::ResentCcField.new('Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
       t.name.should == 'Resent-Cc'
       t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
@@ -56,12 +52,12 @@ describe Mail::ResentCcField do
     
     it "should return the formatted line on to_s" do
       t = Mail::ResentCcField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.to_s.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
+      t.value.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
     end
     
     it "should return the encoded line" do
       t = Mail::ResentCcField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.encoded.should == "Resent-Cc: sam@me.com, my_group: mikel@me.com, bob@you.com;\r\n"
+      t.encoded.should == "Resent-Cc: sam@me.com, \r\n\smy_group: mikel@me.com, \r\n\sbob@you.com;\r\n"
     end
     
   end

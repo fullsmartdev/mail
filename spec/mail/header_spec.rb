@@ -1,7 +1,5 @@
 # encoding: utf-8
-require File.dirname(__FILE__) + '/../spec_helper'
-
-require 'mail'
+require 'spec_helper'
 
 describe Mail::Header do
 
@@ -34,7 +32,207 @@ describe Mail::Header do
       header.should be_has_message_id
     end
     
+    it "should say if it has a content_id field defined" do
+      header = Mail::Header.new("To: Mikel\r\nFrom: bob\r\n")
+      header.should_not be_has_content_id
+    end
+    
+    it "should say if it has a content_id field defined" do
+      header = Mail::Header.new("To: Mikel\r\nFrom: bob\r\nContent-ID: <1234@me.com>")
+      header.should be_has_content_id
+    end
+    
+    it "should know it's own charset" do
+      header = Mail::Header.new("To: Mikel\r\nFrom: bob\r\nContent-ID: <1234@me.com>")
+      header.charset.should == nil
+    end
+    
+    it "should know it's own charset if set" do
+      header = Mail::Header.new
+      header['content-type'] = 'text/plain; charset=utf-8'
+      header.charset.should == 'utf-8'
+    end
+    
+    it "shouldn't die when queried for a charset and the content-type header is invalid" do
+      header = Mail::Header.new
+      header['Content-Type'] = 'invalid/invalid; charset="iso-8859-1"'
+      doing { header.charset }.should_not raise_error
+    end
   end
+
+  describe "creating fields" do
+      it "should recognise a bcc field" do
+        header = Mail::Header.new
+        header['bcc'] = 'mikel@test.lindsaar.net'
+        header['bcc'].field.class.should == Mail::BccField
+      end
+      
+      it "should recognise a cc field" do
+        header = Mail::Header.new
+        header['cc'] = 'mikel@test.lindsaar.net'
+        header['cc'].field.class.should == Mail::CcField
+      end
+      
+      it "should recognise a content-description field" do
+        header = Mail::Header.new
+        header['content-description'] = 'Text'
+        header['content-description'].field.class.should == Mail::ContentDescriptionField
+      end
+      
+      it "should recognise a content-disposition field" do
+        header = Mail::Header.new
+        header['content-disposition'] = 'attachment; filename=File'
+        header['content-disposition'].field.class.should == Mail::ContentDispositionField
+      end
+
+      it "should recognise an inline content-disposition field" do
+        header = Mail::Header.new
+        header['content-disposition'] = 'inline'
+        header['content-disposition'].field.class.should == Mail::ContentDispositionField
+      end
+
+
+      it "should recognise a content-id field" do
+        header = Mail::Header.new
+        header['content-id'] = '<1234@test.lindsaar.net>'
+        header['content-id'].field.class.should == Mail::ContentIdField
+      end
+      
+      it "should recognise a content-transfer-encoding field" do
+        header = Mail::Header.new
+        header['content-transfer-encoding'] = '7bit'
+        header['content-transfer-encoding'].field.class.should == Mail::ContentTransferEncodingField
+      end
+      
+      it "should recognise a content-type field" do
+        header = Mail::Header.new
+        header['content-type'] = 'text/plain'
+        header['content-type'].field.class.should == Mail::ContentTypeField
+      end
+      
+      it "should recognise a date field" do
+        header = Mail::Header.new
+        header['date'] = 'Fri, 21 Nov 1997 09:55:06 -0600'
+        header['date'].field.class.should == Mail::DateField
+      end
+      
+      it "should recognise a from field" do
+        header = Mail::Header.new
+        header['from'] = 'mikel@test.lindsaar.net'
+        header['from'].field.class.should == Mail::FromField
+      end
+      
+      it "should recognise a in-reply-to field" do
+        header = Mail::Header.new
+        header['in-reply-to'] = '<1234@test.lindsaar.net>'
+        header['in-reply-to'].field.class.should == Mail::InReplyToField
+      end
+      
+      it "should recognise a keywords field" do
+        header = Mail::Header.new
+        header['keywords'] = 'mikel test lindsaar net'
+        header['keywords'].field.class.should == Mail::KeywordsField
+      end
+      
+      it "should recognise a message-id field" do
+        header = Mail::Header.new
+        header['message-id'] = '<1234@test.lindsaar.net>'
+        header['message-id'].field.class.should == Mail::MessageIdField
+      end
+      
+      it "should recognise a mime-version field" do
+        header = Mail::Header.new
+        header['mime-version'] = '1.0'
+        header['mime-version'].field.class.should == Mail::MimeVersionField
+      end
+      
+      it "should recognise a received field" do
+        header = Mail::Header.new
+        header['received'] = 'from xxx.xxxx.xxx by xxx.xxxx.xxx with ESMTP id C1B953B4CB6 for <xxxxx@Exxx.xxxx.xxx>; Tue, 10 May 2005 15:27:05 -0500'
+        header['received'].field.class.should == Mail::ReceivedField
+      end
+      
+      it "should recognise a references field" do
+        header = Mail::Header.new
+        header['references'] = '<1234@test.lindsaar.net>'
+        header['references'].field.class.should == Mail::ReferencesField
+      end
+      
+      it "should recognise a reply-to field" do
+        header = Mail::Header.new
+        header['reply-to'] = 'mikel@test.lindsaar.net'
+        header['reply-to'].field.class.should == Mail::ReplyToField
+      end
+      
+      it "should recognise a resent-bcc field" do
+        header = Mail::Header.new
+        header['resent-bcc'] = 'mikel@test.lindsaar.net'
+        header['resent-bcc'].field.class.should == Mail::ResentBccField
+      end
+      
+      it "should recognise a resent-cc field" do
+        header = Mail::Header.new
+        header['resent-cc'] = 'mikel@test.lindsaar.net'
+        header['resent-cc'].field.class.should == Mail::ResentCcField
+      end
+      
+      it "should recognise a resent-date field" do
+        header = Mail::Header.new
+        header['resent-date'] = 'Fri, 21 Nov 1997 09:55:06 -0600'
+        header['resent-date'].field.class.should == Mail::ResentDateField
+      end
+      
+      it "should recognise a resent-from field" do
+        header = Mail::Header.new
+        header['resent-from'] = 'mikel@test.lindsaar.net'
+        header['resent-from'].field.class.should == Mail::ResentFromField
+      end
+      
+      it "should recognise a resent-message-id field" do
+        header = Mail::Header.new
+        header['resent-message-id'] = '<1234@mail.baci.local>'
+        header['resent-message-id'].field.class.should == Mail::ResentMessageIdField
+      end
+      
+      it "should recognise a resent-sender field" do
+        header = Mail::Header.new
+        header['resent-sender'] = 'mikel@test.lindsaar.net'
+        header['resent-sender'].field.class.should == Mail::ResentSenderField
+      end
+      
+      it "should recognise a resent-to field" do
+        header = Mail::Header.new
+        header['resent-to'] = 'mikel@test.lindsaar.net'
+        header['resent-to'].field.class.should == Mail::ResentToField
+      end
+      
+      it "should recognise a return-path field" do
+        header = Mail::Header.new
+        header['return-path'] = '<mikel@me.com>'
+        header['return-path'].field.class.should == Mail::ReturnPathField
+      end
+      
+      it "should recognise a sender field" do
+        header = Mail::Header.new
+        header['sender'] = 'mikel@test.lindsaar.net'
+        header['sender'].field.class.should == Mail::SenderField
+      end
+      
+      it "should recognise a to field" do
+        header = Mail::Header.new
+        header['to'] = 'mikel@test.lindsaar.net'
+        header['to'].field.class.should == Mail::ToField
+      end
+
+      it "should maintain header case" do
+        header = Mail::Header.new
+        header['User-Agent'] = 'My funky mailer'
+        header.encoded.should match(/^User-Agent: /)
+        header.encoded.should_not match(/^user-agent: /)
+      end
+      
+    end
+  
 
   describe "parsing" do
 
@@ -44,7 +242,7 @@ describe Mail::Header do
     end
     
     it "should not split a wrapped header in two" do
-      header = Mail::Header.new("To: Mikel\r\n\tLindsaar\r\nFrom: bob\r\nSubject: This is\r\n a long\r\n\t \t \t \t    badly formatted             \r\n       \t\t  \t       field")
+      header = Mail::Header.new("To: mikel lindsaar\r\n\s<mikel@lindsaar>\r\nFrom: bob\r\nSubject: This is\r\n a long\r\n\s \t \t \t    badly formatted             \r\n       \t\t  \t       field")
       header.fields.length.should == 3
     end
     
@@ -68,7 +266,7 @@ describe Mail::Header do
       test_value << '\r\n'
       doing {Mail::Header.new("header: #{test_value}")}.should_not raise_error
     end
-    
+
     it "should split each field into an name and value" do
       header = Mail::Header.new("To: Mikel\r\nFrom: bob\r\n")
       header.fields[0].name.should == "From"
@@ -118,9 +316,9 @@ describe Mail::Header do
     
     it "should allow you to pass in an array of raw fields" do
       header = Mail::Header.new
-      header.fields = ['From: mikel@me.com', 'To: bob@you.com']
+      header.fields = ['From: mikel@test.lindsaar.net', 'To: bob@you.com']
       header['To'].value.should == 'bob@you.com'
-      header['From'].value.should == 'mikel@me.com'
+      header['From'].value.should == 'mikel@test.lindsaar.net'
     end
     
     it "should reset the value of a single-only field if it already exists" do
@@ -144,11 +342,44 @@ describe Mail::Header do
       header.fields.length.should == 0
     end
     
+    # Handle empty X-Optional header from Microsoft Exchange
+    it "should handle an empty X-* header value" do
+      header = Mail::Header.new("X-MS-TNEF-Correlator:\r\n")
+      header.fields.length.should == 1
+      header['X-MS-TNEF-Correlator'].decoded.should == nil
+      header['X-MS-TNEF-Correlator'].encoded.should == "X-MS-TNEF-Correlator: \r\n"
+    end
+    
+    it "should accept X- option fields from MS-Exchange" do
+      header = Mail::Header.new("X-Ms-Has-Attach:\r\nX-MS-TNEF-Correlator: \r\n")
+      header.fields.length.should == 2
+      header['X-Ms-Has-Attach'].decoded.should == nil
+      header['X-Ms-Has-Attach'].encoded.should == "X-Ms-Has-Attach: \r\n"
+      header['X-MS-TNEF-Correlator'].decoded.should == nil
+      header['X-MS-TNEF-Correlator'].encoded.should == "X-MS-TNEF-Correlator: \r\n"
+    end
+    
     it "should return nil if asked for the value of a non existent field" do
       header = Mail::Header.new
       header['Bobs-Field'].should == nil
     end
     
+    it "should allow you to replace a from field" do
+      header = Mail::Header.new
+      header['From'].should == nil
+      header['From'] = 'mikel@test.lindsaar.net'
+      header['From'].decoded.should == 'mikel@test.lindsaar.net'
+      header['From'] = 'bob@test.lindsaar.net'
+      header['From'].decoded.should == 'bob@test.lindsaar.net'
+    end
+    
+    it "should maintain the class of the field" do
+      header = Mail::Header.new
+      header['From'] = 'mikel@test.lindsaar.net'
+      header['From'].field.class.should == Mail::FromField
+      header['From'] = 'bob@test.lindsaar.net'
+      header['From'].field.class.should == Mail::FromField
+    end
   end
 
   describe "folding and unfolding" do
@@ -201,15 +432,42 @@ HERE
     
   end
   
-  describe "handling fields with multiple values" do
+  describe "error handling" do
+    it "should collect up any of its fields' errors" do
+      header = Mail::Header.new("Content-Transfer-Encoding: vlad\r\nReply-To: a b b")
+      header.errors.should_not be_blank
+      header.errors.size.should == 2
+      header.errors[0][0].should == 'Content-Transfer-Encoding'
+      header.errors[0][1].should == 'vlad'
+      header.errors[1][0].should == 'Reply-To'
+      header.errors[1][1].should == 'a b b'
+    end
+  end
+
+  describe "handling date fields with multiple values" do
     it "should know which fields can only appear once" do
-      %w[ orig-date from sender reply-to to cc bcc 
-          message-id in-reply-to references subject ].each do |field|
+      %w[ date ].each do |field|
         header = Mail::Header.new
-        header[field] = "1234"
-        header[field] = "5678"
-        header[field].value.should == "5678"
+        header[field] = "Thu, 05 Jun 2008 10:53:29 -0700"
+        header[field] = "Mon, 15 Nov 2010 11:05:29 -1100"
+        header[field].value.should == "Mon, 15 Nov 2010 11:05:29 -1100"
       end
+    end
+  
+    it "should know which fields can only appear once" do
+      %w[ from sender reply-to to cc bcc ].each do |field|
+        header = Mail::Header.new
+        header[field] = "mikel@test.lindsaar.net"
+        header[field] = "ada@test.lindsaar.net"
+        header[field].value.should == "ada@test.lindsaar.net"
+      end
+    end
+
+    it "should enforce appear-once rule even with mass assigned header" do
+      header = Mail::Header.new(
+        "Content-Type: multipart/alternative\nContent-Type: text/plain\n"
+      )
+      header['content-type'].should_not be_kind_of(Array)
     end
     
     it "should add additional fields that can appear more than once" do
@@ -263,10 +521,69 @@ TRACEHEADER
 
   describe "encoding" do
     it "should output a parsed version of itself to US-ASCII on encoded and tidy up and sort correctly" do
-      header = Mail::Header.new("To: Mikel\r\n\tLindsaar\r\nFrom: bob\r\nSubject: This is\r\n a long\r\n\t \t \t \t    badly formatted             \r\n       \t\t  \t       field")
-      result = "From: bob\r\nTo: Mikel Lindsaar\r\nSubject: This is a long badly formatted field\r\n"
+      header = Mail::Header.new("To: Mikel\r\n\sLindsaar <mikel@test.lindsaar.net>\r\nFrom: bob\r\n\s<bob@test.lindsaar.net>\r\nSubject: This is\r\n a long\r\n\s \t \t \t    badly formatted             \r\n       \t\t  \t       field")
+      result = "From: bob <bob@test.lindsaar.net>\r\nTo: Mikel Lindsaar <mikel@test.lindsaar.net>\r\nSubject: This is a long badly formatted field\r\n"
       header.encoded.should == result
     end
+  end
+  
+  describe "detecting required fields" do
+    it "should not say it has a message id if it doesn't" do
+      Mail::Header.new.should_not be_has_message_id
+    end
+
+    it "should say it has a message id if it does" do
+      Mail::Header.new('Message-ID: 1234').should be_has_message_id
+    end
+
+    it "should not say it has a date if it doesn't" do
+      Mail::Header.new.should_not be_has_date
+    end
+
+    it "should say it has a date id if it does" do
+      Mail::Header.new('Date: Mon, 24 Nov 1997 14:22:01 -0800').should be_has_date
+    end
+
+    it "should not say it has a mime-version if it doesn't" do
+      Mail::Header.new.should_not be_has_mime_version
+    end
+
+    it "should say it has a date id if it does" do
+      Mail::Header.new('Mime-Version: 1.0').should be_has_mime_version
+    end
+  end
+  
+  describe "mime version handling" do
+    it "should return the mime version of the email" do
+      header = Mail::Header.new("Mime-Version: 1.0")
+      header['mime-version'].value.should == '1.0'
+    end
+    
+    it "should return nil if no mime-version header field" do
+      header = Mail::Header.new('To: bob')
+      header['mime_version'].should == nil
+    end
+    
+    it "should return the transfer-encoding of the email" do
+      header = Mail::Header.new("Content-Transfer-Encoding: Base64")
+      header['content-transfer-encoding'].value.should == 'Base64'
+    end
+    
+    it "should return nil if no transfer-encoding header field" do
+      header = Mail::Header.new
+      header['content-transfer-encoding'].should == nil
+    end
+    
+    it "should return the content-description of the email" do
+      header = Mail::Header.new("Content-Description: This is a description")
+      header['Content-Description'].value.should == 'This is a description'
+    end
+    
+    it "should return nil if no content-description header field" do
+      header = Mail::Header.new
+      header['Content-Description'].should == nil
+    end
+    
   end
 
 end

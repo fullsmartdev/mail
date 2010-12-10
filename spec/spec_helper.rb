@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+require File.expand_path('../environment', __FILE__)
+
 unless defined?(MAIL_ROOT)
   STDERR.puts("Running Specs under Ruby Version #{RUBY_VERSION}")
   MAIL_ROOT = File.join(File.dirname(__FILE__), '../')
@@ -8,15 +10,6 @@ end
 unless defined?(SPEC_ROOT)
   SPEC_ROOT = File.join(File.dirname(__FILE__))
 end
-
-require 'rubygems'
-require 'ruby-debug' if RUBY_VERSION < '1.9'
-require 'spec'
-require 'treetop'
-
-$:.unshift "#{File.dirname(__FILE__)}/mail"
-$:.unshift "#{File.dirname(__FILE__)}/../lib"
-$:.unshift "#{File.dirname(__FILE__)}/../lib/mail"
 
 require File.join(File.dirname(__FILE__), 'matchers', 'break_down_to')
 
@@ -47,6 +40,7 @@ end
 
 # Original mockup from ActionMailer
 class MockSMTP
+  
   def self.deliveries
     @@deliveries
   end
@@ -63,14 +57,29 @@ class MockSMTP
     yield self
   end
   
-  def enable_tls(*args)
-    true
+  def self.clear_deliveries
+    @@deliveries = []
+  end
+  
+  # in the standard lib: net/smtp.rb line 577
+  #   a TypeError is thrown unless this arg is a
+  #   kind of OpenSSL::SSL::SSLContext
+  def enable_tls(context = nil)
+    if context && context.kind_of?(OpenSSL::SSL::SSLContext)
+      true
+    elsif context
+      raise TypeError,
+        "wrong argument (#{context.class})! "+
+        "(Expected kind of OpenSSL::SSL::SSLContext)"
+    end
   end
 
-  def enable_starttls
+  def enable_starttls_auto
     true
   end
+  
 end
+
 class Net::SMTP
   def self.new(*args)
     MockSMTP.new
@@ -78,32 +87,56 @@ class Net::SMTP
 end
 
 class MockPopMail
-  def initialize(rfc8222)
-    @rfc8222 = rfc8222
+  def initialize(rfc2822, number)
+    @rfc2822 = rfc2822
+    @number = number
+    @deleted = false
   end
   
   def pop
-    @rfc8222
+    @rfc2822
+  end
+  
+  def number
+    @number
+  end
+  
+  def to_s
+    "#{number}: #{pop}"
+  end
+
+  def delete
+    @deleted = true
+  end
+
+  def deleted?
+    @deleted
   end
 end
+
 class MockPOP3
   @@start = false
   
   def initialize
-    @@popmails = [
-      MockPopMail.new('test1'),
-      MockPopMail.new('test2'),
-    ]
+    @@popmails = []
+    20.times do |i|
+      # "test00", "test01", "test02", ..., "test19"
+      @@popmails << MockPopMail.new("test#{i.to_s.rjust(2, '0')}", i)
+    end
   end
 
   def self.popmails
-    @@popmails
+    @@popmails.clone
   end
-  
+
   def each_mail(*args)
     @@popmails.each do |popmail|
       yield popmail
     end
+  end
+  
+  def mails(*args)
+    @@popmails.clone
   end
 
   def start(*args)
@@ -129,9 +162,86 @@ class MockPOP3
   def finish
     @@start = false
   end
+  
+  def delete_all
+    @@popmails = []
+  end
 end
+
+require 'net/pop'
 class Net::POP3
   def self.new(*args)
     MockPOP3.new
   end
 end
+
+class MockIMAPFetchData
+  attr_reader :attr
+
+  def initialize(rfc822, number)
+    @attr = { 'RFC822' => rfc822 }
+  end
+
+end
+
+class MockIMAP
+  @@connection = false
+  @@mailbox = nil
+  @@marked_for_deletion = []
+
+  cattr_reader :examples
+
+  def initialize
+    @@examples = []
+    (0..19).each do |i|
+      @@examples << MockIMAPFetchData.new("test#{i.to_s.rjust(2, '0')}", i)
+    end
+  end
+
+  def login(user, password)
+    @@connection = true
+  end
+
+  def disconnect
+    @@connection = false
+  end
+
+  def select(mailbox)
+    @@mailbox = mailbox
+  end
+
+  def uid_search(keys, charset=nil)
+    [*(0..@@examples.size - 1)]
+  end
+
+  def uid_fetch(set, attr)
+    [@@examples[set]]
+  end
+
+  def uid_store(set, attr, flags)
+    if attr == "+FLAGS" && flags.include?(Net::IMAP::DELETED)
+      @@marked_for_deletion << set
+    end
+  end
+
+  def expunge
+    @@marked_for_deletion.reverse.each do |i|    # start with highest index first
+      @@examples.delete_at(i)
+    end
+    @@marked_for_deletion = []
+  end
+
+  def self.mailbox; @@mailbox end    # test only
+
+  def self.disconnected?; @@connection == false end
+  def      disconnected?; @@connection == false end
+
+end
+
+require 'net/imap'
+class Net::IMAP
+  def self.new(*args)
+    MockIMAP.new
+  end
+end
+

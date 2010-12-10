@@ -1,22 +1,21 @@
 # encoding: utf-8
-require File.dirname(__FILE__) + '/../../spec_helper'
+require 'spec_helper'
+
+#    The "Cc:" field (where the "Cc" means "Carbon Copy" in the sense of
+#    making a copy on a typewriter using carbon paper) contains the
+#    addresses of others who are to receive the message, though the
+#    content of the message may not be directed at them.
 
 describe Mail::CcField do
   
   describe "initialization" do
 
     it "should initialize" do
-      doing { Mail::CcField.new("Cc", "Mikel") }.should_not raise_error
+      doing { Mail::CcField.new("Cc: Mikel") }.should_not raise_error
     end
 
     it "should mix in the CommonAddress module" do
-      Mail::CcField.included_modules.should include(Mail::CommonAddress::InstanceMethods) 
-    end
-
-    it "should accept two strings with the field separate" do
-      t = Mail::CcField.new('Cc', 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
-      t.name.should == 'Cc'
-      t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
+      Mail::CcField.included_modules.should include(Mail::CommonAddress) 
     end
 
     it "should accept a string with the field name" do
@@ -56,12 +55,22 @@ describe Mail::CcField do
     
     it "should return the formatted line on to_s" do
       t = Mail::CcField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.to_s.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
+      t.value.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
+    end
+    
+    it "should return the encoded line for one address" do
+      t = Mail::CcField.new('sam@me.com')
+      t.encoded.should == "Cc: sam@me.com\r\n"
     end
     
     it "should return the encoded line" do
       t = Mail::CcField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.encoded.should == "Cc: sam@me.com, my_group: mikel@me.com, bob@you.com;\r\n"
+      t.encoded.should == "Cc: sam@me.com, \r\n\smy_group: mikel@me.com, \r\n\sbob@you.com;\r\n"
+    end
+    
+    it "should return the decoded line" do
+      t = Mail::CcField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
+      t.decoded.should == "sam@me.com, my_group: mikel@me.com, bob@you.com;"
     end
     
   end

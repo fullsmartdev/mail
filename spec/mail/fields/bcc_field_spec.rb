@@ -1,22 +1,36 @@
 # encoding: utf-8
-require File.dirname(__FILE__) + '/../../spec_helper'
+require 'spec_helper'
 
 describe Mail::BccField do
+  
+  #    The "Bcc:" field (where the "Bcc" means "Blind Carbon Copy") contains
+  #    addresses of recipients of the message whose addresses are not to be
+  #    revealed to other recipients of the message.  There are three ways in
+  #    which the "Bcc:" field is used.  In the first case, when a message
+  #    containing a "Bcc:" field is prepared to be sent, the "Bcc:" line is
+  #    removed even though all of the recipients (including those specified
+  #    in the "Bcc:" field) are sent a copy of the message.  In the second
+  #    case, recipients specified in the "To:" and "Cc:" lines each are sent
+  #    a copy of the message with the "Bcc:" line removed as above, but the
+  #    recipients on the "Bcc:" line get a separate copy of the message
+  #    containing a "Bcc:" line.  (When there are multiple recipient
+  #    addresses in the "Bcc:" field, some implementations actually send a
+  #    separate copy of the message to each recipient with a "Bcc:"
+  #    containing only the address of that particular recipient.) Finally,
+  #    since a "Bcc:" field may contain no addresses, a "Bcc:" field can be
+  #    sent without any addresses indicating to the recipients that blind
+  #    copies were sent to someone.  Which method to use with "Bcc:" fields
+  #    is implementation dependent, but refer to the "Security
+  #    Considerations" section of this document for a discussion of each.
   
   describe "initialization" do
 
     it "should initialize" do
-      doing { Mail::BccField.new("Bcc", "Mikel") }.should_not raise_error
+      doing { Mail::BccField.new("Bcc: Mikel") }.should_not raise_error
     end
 
     it "should mix in the CommonAddress module" do
-      Mail::BccField.included_modules.should include(Mail::CommonAddress::InstanceMethods) 
-    end
-
-    it "should accept two strings with the field separate" do
-      t = Mail::BccField.new('Bcc', 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
-      t.name.should == 'Bcc'
-      t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
+      Mail::BccField.included_modules.should include(Mail::CommonAddress) 
     end
 
     it "should accept a string with the field name" do
@@ -56,12 +70,17 @@ describe Mail::BccField do
     
     it "should return the formatted line on to_s" do
       t = Mail::BccField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.to_s.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
+      t.value.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
     end
     
-    it "should return the encoded line" do
+    it "should return nothing on encoded as Bcc should not be in the mail" do
       t = Mail::BccField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.encoded.should == "Bcc: sam@me.com, my_group: mikel@me.com, bob@you.com;\r\n"
+      t.encoded.should == ""
+    end
+    
+    it "should return the decoded line" do
+      t = Mail::BccField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
+      t.decoded.should == "sam@me.com, my_group: mikel@me.com, bob@you.com;"
     end
     
   end

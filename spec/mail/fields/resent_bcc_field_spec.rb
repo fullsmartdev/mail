@@ -1,5 +1,7 @@
 # encoding: utf-8
-require File.dirname(__FILE__) + '/../../spec_helper'
+require 'spec_helper'
+# 
+# resent-bcc      =       "Resent-Bcc:" (address-list / [CFWS]) CRLF
 
 describe Mail::ResentBccField do
   
@@ -10,22 +12,16 @@ describe Mail::ResentBccField do
     end
 
     it "should mix in the CommonAddress module" do
-      Mail::ResentBccField.included_modules.should include(Mail::CommonAddress::InstanceMethods) 
+      Mail::ResentBccField.included_modules.should include(Mail::CommonAddress) 
     end
 
-    it "should aResentBccept two strings with the field separate" do
-      t = Mail::ResentBccField.new('Resent-Bcc', 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
-      t.name.should == 'Resent-Bcc'
-      t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
-    end
-
-    it "should aResentBccept a string with the field name" do
+    it "should accept a string with the field name" do
       t = Mail::ResentBccField.new('Resent-Bcc: Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
       t.name.should == 'Resent-Bcc'
       t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
     end
 
-    it "should aResentBccept a string without the field name" do
+    it "should accept a string without the field name" do
       t = Mail::ResentBccField.new('Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
       t.name.should == 'Resent-Bcc'
       t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
@@ -56,12 +52,12 @@ describe Mail::ResentBccField do
     
     it "should return the formatted line on to_s" do
       t = Mail::ResentBccField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.to_s.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
+      t.value.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
     end
     
     it "should return the encoded line" do
       t = Mail::ResentBccField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.encoded.should == "Resent-Bcc: sam@me.com, my_group: mikel@me.com, bob@you.com;\r\n"
+      t.encoded.should == "Resent-Bcc: sam@me.com, \r\n\smy_group: mikel@me.com, \r\n\sbob@you.com;\r\n"
     end
     
   end

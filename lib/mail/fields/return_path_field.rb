@@ -1,5 +1,13 @@
 # encoding: utf-8
 # 
+# 4.4.3.  REPLY-TO / RESENT-REPLY-TO
+# 
+#    Note:  The "Return-Path" field is added by the mail  transport
+#           service,  at the time of final deliver.  It is intended
+#           to identify a path back to the orginator  of  the  mes-
+#           sage.   The  "Reply-To"  field  is added by the message
+#           originator and is intended to direct replies.
+# 
 # trace           =       [return]
 #                         1*received
 # 
@@ -19,15 +27,37 @@
 # item-value      =       1*angle-addr / addr-spec /
 #                          atom / domain / msg-id
 # 
+require 'mail/fields/common/common_address'
+
 module Mail
   class ReturnPathField < StructuredField
     
-    include CommonAddress
+    include Mail::CommonAddress
     
     FIELD_NAME = 'return-path'
+    CAPITALIZED_FIELD = 'Return-Path'
     
-    def initialize(*args)
-      super(FIELD_NAME, strip_field(FIELD_NAME, args.last))
+    def initialize(value = nil, charset = 'utf-8')
+      self.charset = charset
+      super(CAPITALIZED_FIELD, strip_field(FIELD_NAME, value), charset)
+      self.parse
+      self
+    end
+    
+    def encoded
+      "#{CAPITALIZED_FIELD}: <#{address}>\r\n"
+    end
+    
+    def decoded
+      do_decode
+    end
+    
+    def address
+      addresses.first
+    end
+    
+    def default
+      address
     end
     
   end

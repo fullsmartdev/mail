@@ -33,7 +33,9 @@ module Mail
     # no automatic processing of that field will happen.  If you find one of
     # these cases, please make a patch and send it in, or at the least, send
     # me the example so we can fix it.
-    def initialize(header_text = nil)
+    def initialize(header_text = nil, charset = nil)
+      @errors = []
+      @charset = charset
       self.raw_source = header_text.to_crlf
       split_header if header_text
     end
@@ -47,7 +49,7 @@ module Mail
     # Returns an array of all the fields in the header in order that they
     # were read in.
     def fields
-      @fields ||= []
+      @fields ||= FieldList.new
     end
     
     #  3.6. Field definitions
@@ -72,8 +74,22 @@ module Mail
     def fields=(unfolded_fields)
       @fields = Mail::FieldList.new
       unfolded_fields.each do |field|
-        @fields << Field.new(field)
+
+        field = Field.new(field, nil, charset)
+        field.errors.each { |error| self.errors << error }
+        selected = select_field_for(field.name)
+
+        if selected.any? && limited_field?(field.name)
+          selected.first.update(field.name, field.value)
+        else
+          @fields << field
+        end
       end
+
+    end
+    
+    def errors
+      @errors
     end
     
     #  3.6. Field definitions
@@ -98,7 +114,8 @@ module Mail
     #  h['To']          #=> 'mikel@me.com'
     #  h['X-Mail-SPAM'] #=> ['15', '20']
     def [](name)
-      selected = fields.select { |f| f.responsible_for?(name) }
+      name = dasherize(name).downcase
+      selected = select_field_for(name)
       case
       when selected.length > 1
         selected.map { |f| f }
@@ -123,26 +140,48 @@ module Mail
     #  h['X-Mail-SPAM'] = nil
     #  h['X-Mail-SPAM'] # => nil
     def []=(name, value)
-      selected = fields.select { |f| f.responsible_for?(name) }
+      name = dasherize(name)
+      fn = name.downcase
+      selected = select_field_for(fn)
+      
       case
       # User wants to delete the field
       when !selected.blank? && value == nil
         fields.delete_if { |f| selected.include?(f) }
-
+        
       # User wants to change the field
-      when !selected.blank? && LIMITED_FIELDS.include?(name.downcase)
-        selected.first.update(name, value)
-
+      when !selected.blank? && limited_field?(fn)
+        selected.first.update(fn, value)
+        
       # User wants to create the field
       else
         # Need to insert in correct order for trace fields
-        self.fields << Field.new("#{name}: #{value}")
+        self.fields << Field.new(name.to_s, value, charset)
       end
     end
     
-    LIMITED_FIELDS   = %w[ orig-date from sender reply-to to cc bcc 
+    def charset
+      params = self[:content_type].parameters rescue nil
+      if params
+        params[:charset]
+      else
+        @charset
+      end
+    end
+    
+    def charset=(val)
+      params = self[:content_type].parameters rescue nil
+      if params
+        params[:charset] = val
+      end
+      @charset = val
+    end
+    
+    LIMITED_FIELDS   = %w[ date from sender reply-to to cc bcc 
                            message-id in-reply-to references subject
-                           return-path ]
+                           return-path content-type mime-version
+                           content-transfer-encoding content-description 
+                           content-id content-disposition content-location]
 
     def encoded
       buffer = ''
@@ -152,10 +191,36 @@ module Mail
       buffer
     end
 
-    alias :to_s :encoded
+    def to_s
+      encoded
+    end
+    
+    def decoded
+      raise NoMethodError, 'Can not decode an entire header as there could be character set conflicts, try calling #decoded on the various fields.'
+    end
 
+    def field_summary
+      fields.map { |f| "<#{f.name}: #{f.value}>" }.join(", ")
+    end
+
+    # Returns true if the header has a Message-ID defined (empty or not)
     def has_message_id?
       !fields.select { |f| f.responsible_for?('Message-ID') }.empty?
+    end
+
+    # Returns true if the header has a Content-ID defined (empty or not)
+    def has_content_id?
+      !fields.select { |f| f.responsible_for?('Content-ID') }.empty?
+    end
+
+    # Returns true if the header has a Date defined (empty or not)
+    def has_date?
+      !fields.select { |f| f.responsible_for?('Date') }.empty?
+    end
+
+    # Returns true if the header has a MIME version defined (empty or not)
+    def has_mime_version?
+      !fields.select { |f| f.responsible_for?('Mime-Version') }.empty?
     end
 
     private
@@ -185,6 +250,14 @@ module Mail
     # strings.
     def split_header
       self.fields = unfolded_header.split(CRLF)
+    end
+    
+    def select_field_for(name)
+      fields.select { |f| f.responsible_for?(name.to_s) }
+    end
+    
+    def limited_field?(name)
+      LIMITED_FIELDS.include?(name.to_s.downcase)
     end
     
   end

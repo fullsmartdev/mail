@@ -1,3 +1,11 @@
-.DS_Store
+.bundle
+Gemfile.lock
 coverage
+gems
+/mail-*.gem
 rdoc
+mail.tmproj
+spec/fixtures/emails/failed_emails/
+.rvmrc
+*.rbc
+*.swp

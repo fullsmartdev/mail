@@ -1,90 +1,81 @@
 # encoding: utf-8
-module Mail
+module Mail # :doc:
 
-  require 'treetop'
+  require 'date'
+
+  require 'active_support'
+  require 'active_support/core_ext/class/attribute_accessors'
+  require 'active_support/core_ext/hash/indifferent_access'
+  require 'active_support/core_ext/object/blank'
+  require 'active_support/core_ext/string'
+
+  require 'uri'
   require 'net/smtp'
-  require 'net/pop'
-  require 'tlsmail' if RUBY_VERSION <= '1.8.6'
+  require 'mime/types'
 
-  dir_name = File.join(File.dirname(__FILE__), 'mail')
-
-  require File.join(dir_name, 'core_extensions')
-  require File.join(dir_name, 'patterns')
-  require File.join(dir_name, 'utilities')
-  require File.join(dir_name, 'configuration')
-  require File.join(dir_name, 'network', 'sendable')
-  require File.join(dir_name, 'network', 'retrieve_via_pop3')
-
-  require File.join(dir_name, 'message')
-  require File.join(dir_name, 'header')
-  require File.join(dir_name, 'body')
-  require File.join(dir_name, 'field')
-  require File.join(dir_name, 'field_list')
-
-  # Load in all common header fields modules
-  commons = Dir.glob(File.join(dir_name, 'fields', 'common', '*.rb'))
-  commons.each do |common|
-    require common
-  end
-
-  require File.join(dir_name, 'fields', 'structured_field')
-  require File.join(dir_name, 'fields', 'unstructured_field')
-  require File.join(dir_name, 'envelope')
-
-  Treetop.load(File.join(dir_name, 'parsers', 'rfc2822_obsolete'))
-  Treetop.load(File.join(dir_name, 'parsers', 'rfc2822'))
-  Treetop.load(File.join(dir_name, 'parsers', 'address_lists'))
-  Treetop.load(File.join(dir_name, 'parsers', 'phrase_lists'))
-  Treetop.load(File.join(dir_name, 'parsers', 'date_time'))
-  Treetop.load(File.join(dir_name, 'parsers', 'received'))
-  Treetop.load(File.join(dir_name, 'parsers', 'message_ids'))
-  Treetop.load(File.join(dir_name, 'parsers', 'envelope_from'))
-
-  # Load in all header field elements
-  elems = Dir.glob(File.join(dir_name, 'elements', '*.rb'))
-  elems.each do |elem|
-    require elem
-  end
-
-  # Load in all header fields
-  fields = Dir.glob(File.join(dir_name, 'fields', '*.rb'))
-  fields.each do |field|
-    require field
-  end
-
-  def Mail.message(*args, &block)
-    if block_given?
-      Mail::Message.new(args, &block)
-    else
-      Mail::Message.new(args)
+  if RUBY_VERSION <= '1.8.6'
+    begin
+      require 'tlsmail'
+    rescue LoadError
+      raise "You need to install tlsmail if you are using ruby <= 1.8.6"
     end
   end
 
-  # Set the default configuration to send and receive emails
-  #
-  #   Mail.defaults do
-  #     smtp 'smtp.myhost.fr', 587
-  #     pop3 'pop.myhost.fr'
-  #     user 'bernardo'
-  #     pass 'mypass'
-  #     enable_tls
-  #   end
-  def Mail.defaults(&block)
-    if block_given?
-      Mail::Configuration.instance.defaults(&block)
+  if RUBY_VERSION >= "1.9.1"
+    require 'mail/version_specific/ruby_1_9'
+    RubyVer = Ruby19
+  else
+    require 'mail/version_specific/ruby_1_8'
+    RubyVer = Ruby18
+  end
+
+  require 'mail/version'
+
+  require 'mail/core_extensions/nil'
+  require 'mail/core_extensions/string'
+
+  require 'mail/patterns'
+  require 'mail/utilities'
+  require 'mail/configuration'
+
+  # Autoload mail send and receive classes.
+  require 'mail/network'
+
+  require 'mail/message'
+  require 'mail/part'
+  require 'mail/header'
+  require 'mail/parts_list'
+  require 'mail/attachments_list'
+  require 'mail/body'
+  require 'mail/field'
+  require 'mail/field_list'
+
+  require 'mail/envelope'
+
+  parsers = %w[ rfc2822_obsolete rfc2822 address_lists phrase_lists
+                date_time received message_ids envelope_from rfc2045 
+                mime_version content_type content_disposition
+                content_transfer_encoding content_location ]
+
+  parsers.each do |parser|
+    begin
+      # Try requiring the pre-compiled ruby version first
+      require 'treetop/runtime'
+      require "mail/parsers/#{parser}"
+    rescue LoadError
+      # Otherwise, get treetop to compile and load it
+      require 'treetop/runtime'
+      require 'treetop/compiler'
+      Treetop.load(File.join(File.dirname(__FILE__)) + "/mail/parsers/#{parser}")
     end
   end
 
-  # Send an email using the default configuration
-  def Mail.deliver(*args, &block)
-    Mail.message(args, &block).deliver
-  end
+  # Autoload header field elements and transfer encodings.
+  require 'mail/elements'
+  require 'mail/encodings'
+  require 'mail/encodings/base64'
+  require 'mail/encodings/quoted_printable'
 
-  def Mail.get_all_mail(&block)
-    Mail::Message.get_all_mail(&block)
-  end
-
-  def Mail.read(filename)
-    Mail.message(File.read(filename))
-  end
+  # Finally... require all the Mail.methods
+  require 'mail/mail'
 end

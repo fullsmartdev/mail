@@ -23,26 +23,44 @@ module Mail
   class ReceivedField < StructuredField
     
     FIELD_NAME = 'received'
+    CAPITALIZED_FIELD = 'Received'
     
-    def initialize(*args)
-      super(FIELD_NAME, strip_field(FIELD_NAME, args.last))
+    def initialize(value = nil, charset = 'utf-8')
+      self.charset = charset
+      super(CAPITALIZED_FIELD, strip_field(FIELD_NAME, value), charset)
+      self.parse
+      self
+
     end
     
-    def tree
-      @element ||= ReceivedElement.new(value)
-      @tree ||= @element.tree
+    def parse(val = value)
+      unless val.blank?
+        @element = Mail::ReceivedElement.new(val)
+      end
     end
     
     def element
-      @element ||= ReceivedElement.new(value)
+      @element ||= Mail::ReceivedElement.new(value)
     end
     
     def date_time
-      ::DateTime.parse("#{element.date_time}")
+      @datetime ||= ::DateTime.parse("#{element.date_time}")
     end
 
     def info
       element.info
+    end
+   
+    def formatted_date
+        date_time.strftime("%a, %d %b %Y %H:%M:%S ") + date_time.zone.delete(':')
+    end
+ 
+    def encoded
+      "#{CAPITALIZED_FIELD}: #{info}; #{formatted_date}\r\n"
+    end
+    
+    def decoded
+      "#{info}; #{formatted_date}" 
     end
     
   end

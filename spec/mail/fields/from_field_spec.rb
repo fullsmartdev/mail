@@ -1,5 +1,8 @@
 # encoding: utf-8
-require File.dirname(__FILE__) + '/../../spec_helper'
+require 'spec_helper'
+
+# 
+# from            =       "From:" mailbox-list CRLF
 
 describe Mail::FromField do
   
@@ -10,22 +13,16 @@ describe Mail::FromField do
     end
 
     it "should mix in the CommonAddress module" do
-      Mail::FromField.included_modules.should include(Mail::CommonAddress::InstanceMethods) 
+      Mail::FromField.included_modules.should include(Mail::CommonAddress) 
     end
 
-    it "should aFromept two strings with the field separate" do
-      t = Mail::FromField.new('From', 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
-      t.name.should == 'From'
-      t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
-    end
-
-    it "should aFromept a string with the field name" do
+    it "should accept a string with the field name" do
       t = Mail::FromField.new('From: Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
       t.name.should == 'From'
       t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
     end
 
-    it "should aFromept a string without the field name" do
+    it "should accept a string without the field name" do
       t = Mail::FromField.new('Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>')
       t.name.should == 'From'
       t.value.should == 'Mikel Lindsaar <mikel@test.lindsaar.net>, "Bob Smith" <bob@me.com>'
@@ -56,15 +53,37 @@ describe Mail::FromField do
     
     it "should return the formatted line on to_s" do
       t = Mail::FromField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.to_s.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
+      t.value.should == 'sam@me.com, my_group: mikel@me.com, bob@you.com;'
     end
     
     it "should return the encoded line" do
       t = Mail::FromField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
-      t.encoded.should == "From: sam@me.com, my_group: mikel@me.com, bob@you.com;\r\n"
+      t.encoded.should == "From: sam@me.com, \r\n\smy_group: mikel@me.com, \r\n\sbob@you.com;\r\n"
+    end
+    
+    it "should return the encoded line" do
+      t = Mail::FromField.new("bob@me.com")
+      t.encoded.should == "From: bob@me.com\r\n"
+    end
+    
+    it "should return the decoded line" do
+      t = Mail::FromField.new('sam@me.com, my_group: mikel@me.com, bob@you.com;')
+      t.decoded.should == "sam@me.com, my_group: mikel@me.com, bob@you.com;"
     end
     
   end
   
+  it "should handle non ascii" do
+    t = Mail::FromField.new('"Foo áëô îü" <extended@example.net>')
+    t.decoded.should == '"Foo áëô îü" <extended@example.net>'
+    t.encoded.should == "From: =?UTF-8?B?Rm9vIMOhw6vDtCDDrsO8?= <extended@example.net>\r\n"
+  end
   
+  
+  it "should work without quotes" do
+    t = Mail::FromField.new('Foo áëô îü <extended@example.net>')
+    t.encoded.should == "From: Foo =?UTF-8?B?w6HDq8O0?= =?UTF-8?B?IMOuw7w=?= <extended@example.net>\r\n"
+    t.decoded.should == '"Foo áëô îü" <extended@example.net>'
+  end
+
 end
