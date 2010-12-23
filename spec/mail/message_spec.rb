@@ -56,6 +56,21 @@ describe Mail::Message do
       doing { Mail::Message.new(File.read(fixture('emails', 'error_emails', 'missing_body.eml'))) }.should_not raise_error
     end
 
+
+
+    it "should be able to parse an email with a funky date header" do
+      doing { Mail::Message.new(File.read(fixture('emails', 'error_emails', 'bad_date_header2.eml'))) }
+    end
+
+    it 'should be able to invoke subject on a funky subject header' do
+      Mail::Message.new(File.read(fixture('emails', 'error_emails', 'bad_subject.eml'))).subject
+    end
+
+
+    it 'should be able to parse an email missing an encoding' do
+      Mail::Message.new(File.read(fixture('emails', 'error_emails', 'must_supply_encoding.eml')))
+    end
+
     it "should be able to parse every email example we have without raising an exception" do
       emails = Dir.glob( fixture('emails/**/*') ).delete_if { |f| File.directory?(f) }
 
