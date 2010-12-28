@@ -1957,7 +1957,6 @@ module Mail
       else
         filename = nil
       end
-      filename = Mail::Encodings.decode_encode(filename, :decode) if filename rescue filename
       filename
     end
 

@@ -120,7 +120,7 @@ module Mail
 
       # Split on white-space boundaries with capture, so we capture the white-space as well
       str.split(/([ \t])/).map do |text|
-        if text.index('=?') .nil?
+        if text.index('=?') != 0
           text
         else
           # Join QP encoded-words that are adjacent to avoid decoding partial chars
@@ -128,11 +128,17 @@ module Mail
         
           # Separate encoded-words with a space, so we can treat them one by one
           text.gsub!(/\?\=\=\?/, '?= =?')
+
           text.split(/ /).map do |word|
-            word.to_str.
-              gsub(/=\?.+\?[Bb]\?.+\?=/m) {|substr| b_value_decode(substr)}.
-              gsub(/=\?.+\?[Qq]\?.+\?=/m) {|substr| q_value_decode(substr)}
+            case 
+            when word.to_str =~ /=\?.+\?[Bb]\?/m
+              b_value_decode(word)
+            when text.to_str =~ /=\?.+\?[Qq]\?/m
+              q_value_decode(word)
+            else
+              word.to_str
             end
+          end
         end
       end.join("")
     end
@@ -147,12 +153,8 @@ module Mail
         output
       elsif original_encoding && to_encoding
         begin
-          if RUBY_VERSION >= '1.9'
-            output.encode(to_encoding)
-          else
-            require 'iconv'
-            Iconv.iconv(to_encoding, original_encoding, output).first
-          end
+          require 'iconv'
+          Iconv.iconv(to_encoding, original_encoding, output).first
         rescue Iconv::IllegalSequence, Iconv::InvalidEncoding, Errno::EINVAL
           # the 'from' parameter specifies a charset other than what the text
           # actually is...not much we can do in this case but just return the
