@@ -37,7 +37,7 @@ module Mail
     
     def initialize(values)
       self.settings = { :address              => "localhost",
-                        :port                 => 143,
+                        :port                 => 110,
                         :user_name            => nil,
                         :password             => nil,
                         :authentication       => nil,
