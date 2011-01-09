@@ -54,8 +54,6 @@ module Mail
     #   order:   order of emails returned. Possible values are :asc or :desc. Default value is :asc.
     #   count:   number of emails to retrieve. The default value is 10. A value of 1 returns an
     #            instance of Message, not an array of Message instances.
-    #   ready_only: will ensure that no writes are made to the inbox during the session. 
-    #               This is helpful when you don't want your messages to be set to read automatically. Default is false.
     #   delete_after_find: flag for whether to delete each retreived email after find. Default
     #           is false. Use #find_and_delete if you would like this to default to true.
     #
@@ -63,7 +61,7 @@ module Mail
       options = validate_options(options)
 
       start do |imap|
-        options[:read_only] ? imap.select(options[:mailbox]) : imap.examine(options[:mailbox])
+        imap.select(options[:mailbox])
 
         message_ids = imap.uid_search(options[:keys])
         message_ids.reverse! if options[:what].to_sym == :last
@@ -103,7 +101,7 @@ module Mail
       mailbox = Net::IMAP.encode_utf7(mailbox)
 
       start do |imap|
-        options[:read_only] ? imap.select(options[:mailbox]) : imap.examine(options[:mailbox])
+        imap.select(mailbox)
         imap.uid_search(['ALL']).each do |message_id|
           imap.uid_store(message_id, "+FLAGS", [Net::IMAP::DELETED])
         end
@@ -132,7 +130,6 @@ module Mail
         options[:keys]    ||= 'ALL'
         options[:delete_after_find] ||= false
         options[:mailbox] = Net::IMAP.encode_utf7(options[:mailbox])
-        options[:read_only] ||= false
 
         options
       end
