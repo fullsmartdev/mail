@@ -51,19 +51,10 @@ class MockSMTP
 
   def sendmail(mail, from, to)
     @@deliveries << [mail, from, to]
-    'OK'
   end
 
   def start(*args)
-    if block_given?
-      return yield(self)
-    else
-      return self
-    end
-  end
-  
-  def finish
-    return true
+    yield self
   end
   
   def self.clear_deliveries
