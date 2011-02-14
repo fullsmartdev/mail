@@ -11,4 +11,3 @@ spec/fixtures/emails/failed_emails/
 *.swp
 .idea
 tmp
-tags
