@@ -242,9 +242,9 @@ module Mail
     #
     # Returns self
     def deliver!
-      delivery_method.deliver!(self)
+      response = delivery_method.deliver!(self)
       inform_observers
-      self
+      delivery_method.settings[:return_response] ? response : self
     end
 
     def delivery_method(method = nil, settings = {})
@@ -270,7 +270,7 @@ module Mail
           reply.references ||= bracketed_message_id
         end
         if subject
-          reply.subject = "RE: #{subject}"
+          reply.subject = subject =~ /^Re:/i ? subject : "RE: #{subject}"
         end
         if reply_to || from
           reply.to = self[reply_to ? :reply_to : :from].to_s
