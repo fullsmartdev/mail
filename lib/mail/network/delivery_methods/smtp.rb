@@ -124,12 +124,11 @@ module Mail
         end
       end
       
-      response = nil
       smtp.start(settings[:domain], settings[:user_name], settings[:password], settings[:authentication]) do |smtp|
-        response = smtp.sendmail(message, envelope_from, destinations)
+        smtp.sendmail(message, envelope_from, destinations)
       end
-
-      return settings[:return_response] ? response : self
+      
+      self
     end
     
     

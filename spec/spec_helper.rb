@@ -1,4 +1,5 @@
 # encoding: utf-8
+
 require File.expand_path('../environment', __FILE__)
 
 unless defined?(MAIL_ROOT)
@@ -14,8 +15,8 @@ require File.join(File.dirname(__FILE__), 'matchers', 'break_down_to')
 
 require 'mail'
 
-Spec::Runner.configure do |config|
-  config.include(CustomMatchers)
+Spec::Runner.configure do |config|  
+  config.include(CustomMatchers)  
 end
 
 def fixture(*name)
@@ -39,7 +40,7 @@ end
 
 # Original mockup from ActionMailer
 class MockSMTP
-
+  
   def self.deliveries
     @@deliveries
   end
@@ -50,25 +51,16 @@ class MockSMTP
 
   def sendmail(mail, from, to)
     @@deliveries << [mail, from, to]
-    'OK'
   end
 
   def start(*args)
-    if block_given?
-      return yield(self)
-    else
-      return self
-    end
+    yield self
   end
-
-  def finish
-    return true
-  end
-
+  
   def self.clear_deliveries
     @@deliveries = []
   end
-
+  
   # in the standard lib: net/smtp.rb line 577
   #   a TypeError is thrown unless this arg is a
   #   kind of OpenSSL::SSL::SSLContext
@@ -85,7 +77,7 @@ class MockSMTP
   def enable_starttls_auto
     true
   end
-
+  
 end
 
 class Net::SMTP
@@ -100,15 +92,15 @@ class MockPopMail
     @number = number
     @deleted = false
   end
-
+  
   def pop
     @rfc2822
   end
-
+  
   def number
     @number
   end
-
+  
   def to_s
     "#{number}: #{pop}"
   end
@@ -124,7 +116,7 @@ end
 
 class MockPOP3
   @@start = false
-
+  
   def initialize
     @@popmails = []
     20.times do |i|
@@ -142,7 +134,7 @@ class MockPOP3
       yield popmail
     end
   end
-
+  
   def mails(*args)
     @@popmails.clone
   end
@@ -151,7 +143,7 @@ class MockPOP3
     @@start = true
     block_given? ? yield(self) : self
   end
-
+  
   def enable_ssl(*args)
     true
   end
@@ -166,11 +158,11 @@ class MockPOP3
 
   def reset
   end
-
+  
   def finish
     @@start = false
   end
-
+  
   def delete_all
     @@popmails = []
   end
