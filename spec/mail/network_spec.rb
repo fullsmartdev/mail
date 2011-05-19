@@ -44,9 +44,7 @@ describe "Mail" do
                                                 :password             => nil,
                                                 :authentication       => nil,
                                                 :enable_starttls_auto => true,
-                                                :openssl_verify_mode  => nil,
-                                                :ssl                  => nil,
-                                                :tls                  => nil }
+                                                :openssl_verify_mode  => nil }
     end
 
     it "should set the retriever method" do
