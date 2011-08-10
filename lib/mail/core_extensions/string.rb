@@ -8,10 +8,8 @@ class String #:nodoc:
     gsub(/\n|\r\n|\r/) { "\n" }
   end
 
-  unless String.instance_methods(false).map {|m| m.to_sym}.include?(:blank?)
-    def blank?
-      self !~ /\S/
-    end
+  def blank?
+    self !~ /\S/
   end
 
   unless method_defined?(:ascii_only?)
