@@ -267,7 +267,8 @@ module Mail
     end
     
     def only_us_ascii?
-      !(raw_source =~ /[^\x01-\x7f]/)
+      raw_source.each_byte {|b| return false if (b == 0 || b > 127)}
+      true
     end
     
     def empty?
