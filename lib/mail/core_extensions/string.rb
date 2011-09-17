@@ -1,11 +1,11 @@
 # encoding: utf-8
 class String #:nodoc:
   def to_crlf
-    to_str.gsub(/\n|\r\n|\r/) { "\r\n" }
+    gsub(/\n|\r\n|\r/) { "\r\n" }
   end
 
   def to_lf
-    to_str.gsub(/\n|\r\n|\r/) { "\n" }
+    gsub(/\n|\r\n|\r/) { "\n" }
   end
 
   def blank?
