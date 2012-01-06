@@ -59,10 +59,4 @@ describe 'core_extensions/string' do
     end
   end
 
-  describe 'constantize' do
-    it 'should converts string to constant' do
-      "Kernel".constantize.should == Kernel
-    end
-  end
-
 end
