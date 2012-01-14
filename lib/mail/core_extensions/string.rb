@@ -1,15 +1,17 @@
 # encoding: utf-8
 class String #:nodoc:
   def to_crlf
-    gsub(/\n|\r\n|\r/) { "\r\n" }
+    to_str.gsub(/\n|\r\n|\r/) { "\r\n" }
   end
 
   def to_lf
-    gsub(/\n|\r\n|\r/) { "\n" }
+    to_str.gsub(/\n|\r\n|\r/) { "\n" }
   end
 
-  def blank?
-    self !~ /\S/
+  unless String.instance_methods(false).map {|m| m.to_sym}.include?(:blank?)
+    def blank?
+      self !~ /\S/
+    end
   end
 
   unless method_defined?(:ascii_only?)

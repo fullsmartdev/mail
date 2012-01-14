@@ -1232,6 +1232,30 @@ describe Mail::Message do
 
   end
 
+  describe "text messages" do
+    def message_with_iso_8859_1_charset
+      "From: test@example.com\r\n"+
+      "Content-Type: text/plain; charset=iso-8859-1\r\n"+
+      "Content-Transfer-Encoding: quoted-printable\r\n"+
+      "Date: Tue, 27 Sep 2011 16:59:48 +0100 (BST)\r\n"+
+      "Subject: test\r\n\r\n"+
+      "Am=E9rica"
+    end
+
+    before(:each) do
+      @message = Mail.new(message_with_iso_8859_1_charset)
+    end
+
+    it "should be decoded using content type charset" do
+      @message.decoded.should == "América"
+    end
+
+    it "should respond true to text?" do
+      @message.text?.should == true
+    end
+
+  end
+
   describe "helper methods" do
 
     describe "==" do
@@ -1537,6 +1561,24 @@ describe Mail::Message do
       doing { mail.attachment? }.should_not raise_error
     end
 
+  end
+
+  describe "without_attachments!" do
+    it "should delete all attachments" do
+      emails_with_attachments = ['content_disposition', 'content_location',
+                                 'pdf', 'with_encoded_name', 'with_quoted_filename']
+
+      emails_with_attachments.each { |email|
+        mail = Mail.read(fixture(File.join('emails', 'attachment_emails', "attachment_#{email}.eml")))
+        mail_length_with_attachments = mail.to_s.length
+        mail.has_attachments?.should be_true
+        mail.without_attachments!
+
+        mail_length_without_attachments = mail.to_s.length
+        mail_length_without_attachments.should < mail_length_with_attachments
+        mail.has_attachments?.should be_false
+      }
+    end
   end
 
   describe "replying" do
