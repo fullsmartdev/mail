@@ -65,7 +65,7 @@ describe "SMTP Delivery Method" do
         delivery_method :file, :location => tmpdir
       end
       
-      Mail.deliver do
+      mail = Mail.deliver do
         from    'roger@moore.com'
         to      '"Long, stupid email address" <mikel@test.lindsaar.net>'
         subject 'invalid RFC2822'

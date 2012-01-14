@@ -240,13 +240,13 @@ describe Mail::Message do
     it "should give the header class the header to parse" do
       header = Mail::Header.new("To: mikel\r\nFrom: bob\r\nSubject: Hello!")
       Mail::Header.should_receive(:new).with("To: mikel\r\nFrom: bob\r\nSubject: Hello!", 'UTF-8').and_return(header)
-      Mail::Message.new(basic_email)
+      mail = Mail::Message.new(basic_email)
     end
 
     it "should give the header class the header to parse even if there is no body" do
       header = Mail::Header.new("To: mikel\r\nFrom: bob\r\nSubject: Hello!")
       Mail::Header.should_receive(:new).with("To: mikel\r\nFrom: bob\r\nSubject: Hello!", 'UTF-8').and_return(header)
-      Mail::Message.new("To: mikel\r\nFrom: bob\r\nSubject: Hello!")
+      mail = Mail::Message.new("To: mikel\r\nFrom: bob\r\nSubject: Hello!")
     end
 
     it "should give the body class the body to parse" do
@@ -259,7 +259,7 @@ describe Mail::Message do
     it "should still ask the body for a new instance even though these is nothing to parse, yet" do
       body = Mail::Body.new('')
       Mail::Body.should_receive(:new).and_return(body)
-      Mail::Message.new("To: mikel\r\nFrom: bob\r\nSubject: Hello!")
+      mail = Mail::Message.new("To: mikel\r\nFrom: bob\r\nSubject: Hello!")
     end
 
     it "should give the header the part before the line without spaces and the body the part without" do
@@ -1309,21 +1309,21 @@ describe Mail::Message do
       it "should preserve the message id of self if set" do
         m1 = Mail.new("To: mikel@test.lindsaar.net\r\nMessage-ID: <1234@test.lindsaar.net>\r\nSubject: Yo!\r\n\r\nHello there")
         m2 = Mail.new("To: mikel@test.lindsaar.net\r\nSubject: Yo!\r\n\r\nHello there")
-        m1 == m2
+        (m1 == m2).should be_true # confirm the side-effects of the comparison
         m1.message_id.should eq '1234@test.lindsaar.net'
       end
 
       it "should preserve the message id of other if set" do
         m1 = Mail.new("To: mikel@test.lindsaar.net\r\nSubject: Yo!\r\n\r\nHello there")
         m2 = Mail.new("To: mikel@test.lindsaar.net\r\nMessage-ID: <1234@test.lindsaar.net>\r\nSubject: Yo!\r\n\r\nHello there")
-        m1 == m2
+        (m1 == m2).should be_true # confirm the side-effects of the comparison
         m2.message_id.should eq '1234@test.lindsaar.net'
       end
 
       it "should preserve the message id of both if set" do
         m1 = Mail.new("To: mikel@test.lindsaar.net\r\nMessage-ID: <4321@test.lindsaar.net>\r\nSubject: Yo!\r\n\r\nHello there")
         m2 = Mail.new("To: mikel@test.lindsaar.net\r\nMessage-ID: <1234@test.lindsaar.net>\r\nSubject: Yo!\r\n\r\nHello there")
-        m1 == m2
+        (m1 == m2).should be_false # confirm the side-effects of the comparison
         m1.message_id.should eq '4321@test.lindsaar.net'
         m2.message_id.should eq '1234@test.lindsaar.net'
       end
@@ -1588,7 +1588,7 @@ describe Mail::Message do
         mail.without_attachments!
 
         mail_length_without_attachments = mail.to_s.length
-        mail_length_without_attachments.should < mail_length_with_attachments
+        mail_length_without_attachments.should be < mail_length_with_attachments
         mail.has_attachments?.should be_false
       }
     end
