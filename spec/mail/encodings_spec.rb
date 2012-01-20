@@ -107,7 +107,6 @@ describe Mail::Encodings do
         doing {Mail::Encodings.b_value_encode(string)}.should_not raise_error
       else
         string = "This is あ string"
-        encoding = 'UTF-8'
         doing {Mail::Encodings.b_value_encode(string, nil)}.should raise_error("Must supply an encoding")
       end
     end
@@ -201,7 +200,6 @@ describe Mail::Encodings do
         doing {Mail::Encodings.q_value_encode(string)}.should_not raise_error
       else
         string = "This is あ string"
-        encoding = 'UTF-8'
         doing {Mail::Encodings.q_value_encode(string)}.should raise_error("Must supply an encoding")
       end
     end
@@ -273,9 +271,8 @@ describe Mail::Encodings do
     
     it "should round trip another complex string (koi-8)" do
       original = "Слово 9999 и число"
-      orginial = original.encode('koi8-r') if RUBY_VERSION >= "1.9"
       mail = Mail.new
-      mail.subject = original
+      mail.subject = (RUBY_VERSION >= "1.9" ? original.encode('koi8-r') : original)
       mail[:subject].charset = 'koi8-r'
       wrapped = mail[:subject].wrapped_value
       unwrapped = Mail::Encodings.value_decode(wrapped)
@@ -616,27 +613,18 @@ describe Mail::Encodings do
         a = "=?Shift_JIS?Q?=93=FA=96{=8C=EA=?= <a@example.com>, =?Shift_JIS?Q?=93=FA=96{=8C=EA=?= <b@example.com>"
         b = Mail::Encodings.unquote_and_convert_to(a, 'utf-8')
         b.should eq "日本語 <a@example.com>, 日本語 <b@example.com>"
-      end
-
-      it "should handle multiline quoted headers with mixed content" do
-        a = "=?iso-2022-jp?B?GyRCP3AwQxsoQg==?=2=?iso-2022-jp?B?GyRCIiobKEI=?= =?iso-2022-jp?B?GyRCOkc2YUxnPj4kcj5+JGsySCQsJFskSCRzJEk4K0V2GyhC?= =?iso-2022-jp?B?GyRCJD8kaSRKJCQhKjxkJDckJCQzJEgkRyQ5JE0hI0Z8GyhC?= =?iso-2022-jp?B?GyRCS1wkTiQkJCQkSCQzJG0hIiRvJFMkNSRTJE5AJDMmGyhC?= =?iso-2022-jp?B?GyRCJCw8OiRvJGwkRCREJCIkazg9Ol8hIiRKJHMkSCQrGyhC?= =?iso-2022-jp?B?GyRCOGVAJCRLO0QkNSRNJFAhIkxeQk4kSiQkISokSCReGyhC?= =?iso-2022-jp?B?GyRCJF4kTztXJCYkTiRAISMbKEI=?="
-        b = Mail::Encodings.unquote_and_convert_to(a, 'utf-8')
-        b.should eq "瑞庵2→最近門松を飾る家がほとんど見当たらない！寂しいことですね。日本のいいところ、わびさびの世界が失われつつある現在、なんとか後世に残さねば、勿体ない！とままは思うのだ。"
-      end
-
+      end      
     end
   end
   
   describe "quoted printable encoding and decoding" do
     it "should handle underscores in the text" do
       expected = 'something_with_underscores'
-      encoded = [expected].pack('M')
       Mail::Encodings.get_encoding(:quoted_printable).encode(expected).unpack("M").first.should eq expected
     end
 
     it "should handle underscores in the text" do
       expected = 'something with_underscores'
-      encoded = [expected].pack('M')
       Mail::Encodings.get_encoding(:quoted_printable).encode(expected).unpack("M").first.should eq expected
     end
 
