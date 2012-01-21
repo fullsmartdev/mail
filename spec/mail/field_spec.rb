@@ -233,13 +233,13 @@ describe Mail::Field do
     end
 
     it "more tolerable to encoding definitions, UTF (issue 120)" do
-      to = Mail::ToField.new("=?utf8?B?44GCZOOBgg==?= <ada@test.lindsaar.net>", 'utf-8')
-      to.encoded.should eq "To: =?utf8?B?44GCZOOBgg==?= <ada@test.lindsaar.net>\r\n"
+      to = Mail::ToField.new("=?utf-8?B?44GCZOOBgg==?= <ada@test.lindsaar.net>", 'utf-8')
+      to.encoded.should eq "To: =?utf-8?B?44GCZOOBgg==?= <ada@test.lindsaar.net>\r\n"
       to.decoded.should eq "\"あdあ\" <ada@test.lindsaar.net>"
     end
 
     it "more tolerable to encoding definitions, ISO (issue 120)" do
-      subject = Mail::SubjectField.new("=?UTF8?B?UmU6IHRlc3QgZW52w61vIG1lbnNhamUgY29u?=", 'utf-8')
+      subject = Mail::SubjectField.new("=?UTF-8?B?UmU6IHRlc3QgZW52w61vIG1lbnNhamUgY29u?=", 'utf-8')
       subject.decoded.should eq "Re: test envío mensaje con"
     end
 
@@ -260,8 +260,8 @@ describe Mail::Field do
         error = e
       end
       error.should_not be_nil
-      error.element.should eq Mail::DateTimeElement
-      error.value.should eq "invalid"
+      error.element.should == Mail::DateTimeElement
+      error.value.should == "invalid"
       error.reason.should_not be_nil
     end
 
