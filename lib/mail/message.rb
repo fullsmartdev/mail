@@ -1884,7 +1884,6 @@ module Mail
     end
 
     def raw_source=(value)
-      value.force_encoding("binary") if RUBY_VERSION >= "1.9.1"
       @raw_source = value.to_crlf
     end
 
