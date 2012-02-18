@@ -3,10 +3,8 @@
 # This is not loaded if ActiveSupport is already loaded
 
 class NilClass #:nodoc:
-  unless nil.respond_to? :blank?
-    def blank?
-      true
-    end
+  def blank?
+    true
   end
 
   def to_crlf
