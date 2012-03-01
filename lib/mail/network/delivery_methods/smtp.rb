@@ -133,13 +133,9 @@ module Mail
             if openssl_verify_mode.kind_of?(String)
               openssl_verify_mode = "OpenSSL::SSL::VERIFY_#{openssl_verify_mode.upcase}".constantize
             end
-            if RUBY_VERSION >= '1.9.0'
-              context = Net::SMTP.default_ssl_context
-              context.verify_mode = openssl_verify_mode
-              smtp.enable_tls(context)
-            else
-              smtp.enable_tls(openssl_verify_mode)
-            end
+            context = Net::SMTP.default_ssl_context
+            context.verify_mode = openssl_verify_mode
+            smtp.enable_starttls_auto(context)
           end
         end
       end
