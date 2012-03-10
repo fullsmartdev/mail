@@ -78,7 +78,9 @@ module Mail
 
         field = Field.new(field, nil, charset)
         field.errors.each { |error| self.errors << error }
-        if limited_field?(field.name) && (selected = select_field_for(field.name)) && selected.any? 
+        selected = select_field_for(field.name)
+
+        if selected.any? && limited_field?(field.name)
           selected.first.update(field.name, field.value)
         else
           @fields << field
@@ -252,7 +254,7 @@ module Mail
     end
     
     def select_field_for(name)
-      fields.select { |f| f.responsible_for?(name) }
+      fields.select { |f| f.responsible_for?(name.to_s) }
     end
     
     def limited_field?(name)

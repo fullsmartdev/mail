@@ -34,7 +34,7 @@ module Mail
     end
 
     def responsible_for?( val )
-      name.to_s.casecmp(val.to_s) == 0
+      name.to_s.downcase == val.to_s.downcase
     end
 
     private
