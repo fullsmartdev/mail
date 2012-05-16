@@ -9,7 +9,6 @@ module Mail
     
     def initialize(value = nil, charset = 'utf-8')
       self.charset = charset
-      ensure_filename_quoted(value)
       super(CAPITALIZED_FIELD, strip_field(FIELD_NAME, value), charset)
       self.parse
       self

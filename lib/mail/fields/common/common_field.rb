@@ -47,11 +47,5 @@ module Mail
       end
     end
 
-    def ensure_filename_quoted(value)
-      if !value.is_a?(Array) and /(.)*\s(filename|name)=[^"](.+\s)+[^"]/.match value
-        value.gsub!(/[^=]+$/, '"\\0"')
-      end
-    end
-
   end
 end
