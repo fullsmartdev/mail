@@ -14,11 +14,11 @@ module Mail
 
       # Decode the string from Quoted-Printable
       def self.decode(str)
-        str.unpack("M*").first.to_lf
+        str.unpack("M*").first
       end
 
       def self.encode(str)
-        [str.to_lf].pack("M").to_crlf
+        [str].pack("M").to_crlf
       end
 
       def self.cost(str)
