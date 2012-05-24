@@ -1,5 +1,3 @@
-require 'mail/check_delivery_params'
-
 module Mail
   # == Sending Email with SMTP
   # 
@@ -37,7 +35,6 @@ module Mail
   # 
   #   mail.deliver!
   class SMTPConnection
-    include Mail::CheckDeliveryParams
 
     def initialize(values)
       raise ArgumentError.new('A Net::SMTP object is required for this delivery method') if values[:connection].nil?
@@ -51,9 +48,25 @@ module Mail
     # Send the message via SMTP.
     # The from and to attributes are optional. If not set, they are retrieve from the Message.
     def deliver!(mail)
-      envelope_from, destinations, message = check_params(mail)
-      response = smtp.sendmail(message, envelope_from, destinations)
 
+      # Set the envelope from to be either the return-path, the sender or the first from address
+      envelope_from = mail.return_path || mail.sender || mail.from_addrs.first
+      if envelope_from.blank?
+        raise ArgumentError.new('A sender (Return-Path, Sender or From) required to send a message') 
+      end
+      
+      destinations ||= mail.destinations if mail.respond_to?(:destinations) && mail.destinations
+      if destinations.blank?
+        raise ArgumentError.new('At least one recipient (To, Cc or Bcc) is required to send a message') 
+      end
+      
+      message ||= mail.encoded if mail.respond_to?(:encoded)
+      if message.blank?
+        raise ArgumentError.new('A encoded content is required to send a message')
+      end
+            
+      response = smtp.sendmail(message, envelope_from, destinations)
+      
       settings[:return_response] ? response : self 
     end
         

@@ -1,5 +1,3 @@
-require 'mail/check_delivery_params'
-
 module Mail
   # The TestMailer is a bare bones mailer that does nothing.  It is useful
   # when you are testing.
@@ -7,7 +5,6 @@ module Mail
   # It also provides a template of the minimum methods you require to implement
   # if you want to make a custom mailer for Mail
   class TestMailer
-    include Mail::CheckDeliveryParams
 
     # Provides a store of all the emails sent with the TestMailer so you can check them.
     def TestMailer.deliveries
@@ -36,7 +33,6 @@ module Mail
     attr_accessor :settings
 
     def deliver!(mail)
-      check_params(mail)
       Mail::TestMailer.deliveries << mail
     end
     
