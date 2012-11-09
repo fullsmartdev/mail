@@ -141,9 +141,7 @@ module Mail
     def sanatize( val )
 
       # TODO: check if there are cases where whitespace is not a separator
-      val = val.
-        gsub(/\s*=\s*/,'='). # remove whitespaces around equal sign
-        tr(' ',';').
+      val = val.tr(' ',';').
         squeeze(';').
         gsub(';', '; '). #use '; ' as a separator (or EOL)
         gsub(/;\s*$/,'') #remove trailing to keep examples below
