@@ -26,7 +26,7 @@ module Mail
     end
 
     def lookup_delivery_method(method)
-      case method.is_a?(String) ? method.to_sym : method
+      case method
       when nil
         Mail::SMTP
       when :smtp
