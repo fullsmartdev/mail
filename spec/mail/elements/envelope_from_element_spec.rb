@@ -4,15 +4,15 @@ describe Mail::EnvelopeFromElement do
   
   describe "parsing a from envelope string" do
     it "should parse a full field" do
-      doing { Mail::EnvelopeFromElement.new("mikel@test.lindsaar.net  Mon Aug  7 00:39:21 2009") }.should_not raise_error
+      Mail::EnvelopeFromElement.new("mikel@test.lindsaar.net  Mon Aug  7 00:39:21 2009").tree.should_not be_nil
     end
 
     it "should parse a full field with a double digit day" do
-      doing { Mail::EnvelopeFromElement.new("mikel@test.lindsaar.net  Mon Aug 17 00:39:21 2009") }.should_not raise_error
+      Mail::EnvelopeFromElement.new("mikel@test.lindsaar.net  Mon Aug 17 00:39:21 2009").tree.should_not be_nil
     end
 
     it "should parse a full field with a single space day" do
-      doing { Mail::EnvelopeFromElement.new("mikel@test.lindsaar.net Mon Aug 17 00:39:21 2009") }.should_not raise_error
+      Mail::EnvelopeFromElement.new("mikel@test.lindsaar.net Mon Aug 17 00:39:21 2009").tree.should_not be_nil
     end
   end
 
