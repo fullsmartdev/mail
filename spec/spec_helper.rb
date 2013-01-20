@@ -95,7 +95,7 @@ class MockSMTP
     end
   end
 
-  def enable_starttls_auto(context = :dummy_ssl_context)
+  def enable_starttls_auto
     true
   end
 
