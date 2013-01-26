@@ -50,7 +50,7 @@ module Mail
     def initialize(header_text = nil, charset = nil)
       @errors = []
       @charset = charset
-      self.raw_source = header_text.to_crlf.lstrip
+      self.raw_source = header_text.to_crlf
       split_header if header_text
     end
     
