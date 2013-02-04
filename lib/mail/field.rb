@@ -22,7 +22,7 @@ module Mail
   #
   class Field
 
-    include Utilities
+    include Patterns
     include Comparable
 
     STRUCTURED_FIELDS = %w[ bcc cc content-description content-disposition
@@ -67,10 +67,6 @@ module Mail
       "content-location" => ContentLocationField,
     }
 
-    FIELD_NAME_MAP = FIELDS_MAP.inject({}) do |map, (field, field_klass)|
-      map.update(field => field_klass::CAPITALIZED_FIELD)
-    end
-
     # Generic Field Exception
     class FieldError < StandardError
     end
@@ -114,19 +110,15 @@ module Mail
     def initialize(name, value = nil, charset = 'utf-8')
       case
       when name =~ /:/                  # Field.new("field-name: field data")
-        @charset = value.blank? ? charset : value
-        @name = name[FIELD_PREFIX]
-        @raw_value = name
+        charset = value unless value.blank?
+        name, value = split(name)
+        create_field(name, value, charset)
       when name !~ /:/ && value.blank?  # Field.new("field-name")
-        @name = name
-        @value = nil
-        @charset = charset
+        create_field(name, nil, charset)
       else                              # Field.new("field-name", "value")
-        @name = name
-        @value = value
-        @charset = charset
+        create_field(name, value, charset)
       end
-      @name = FIELD_NAME_MAP[@name.to_s.downcase] || @name
+      return self
     end
 
     def field=(value)
@@ -134,12 +126,11 @@ module Mail
     end
 
     def field
-      _, @value = split(@raw_value) if @raw_value && !@value
-      @field ||= create_field(@name, @value, @charset)
+      @field
     end
 
     def name
-      @name
+      field.name
     end
 
     def value
@@ -147,7 +138,7 @@ module Mail
     end
 
     def value=(val)
-      @field = create_field(name, val, @charset)
+      create_field(name, val, charset)
     end
 
     def to_s
@@ -155,15 +146,11 @@ module Mail
     end
 
     def update(name, value)
-      @field = create_field(name, value, @charset)
+      create_field(name, value, charset)
     end
 
     def same( other )
-      match_to_s(other.name, self.name)
-    end
-
-    def responsible_for?( val )
-      name.to_s.casecmp(val.to_s) == 0
+      match_to_s(other.name, field.name)
     end
 
     alias_method :==, :same
@@ -200,27 +187,13 @@ module Mail
       STDERR.puts "WARNING: Could not parse (and so ignoring) '#{raw_field}'"
     end
 
-    # 2.2.3. Long Header Fields
-    #
-    #  The process of moving from this folded multiple-line representation
-    #  of a header field to its single line representation is called
-    #  "unfolding". Unfolding is accomplished by simply removing any CRLF
-    #  that is immediately followed by WSP.  Each header field should be
-    #  treated in its unfolded form for further syntactic and semantic
-    #  evaluation.
-    def unfold(string)
-      string.gsub(/[\r\n \t]+/m, ' ')
-    end
-
     def create_field(name, value, charset)
-      value = unfold(value) if value.is_a?(String) || value.is_a?(Mail::Multibyte::Chars)
-
       begin
-        new_field(name, value, charset)
+        self.field = new_field(name, value, charset)
       rescue Mail::Field::ParseError => e
-        field = Mail::UnstructuredField.new(name, value)
-        field.errors << [name, value, e]
-        field
+        self.field = Mail::UnstructuredField.new(name, value)
+        self.field.errors << [name, value, e]
+        self.field
       end
     end
 
