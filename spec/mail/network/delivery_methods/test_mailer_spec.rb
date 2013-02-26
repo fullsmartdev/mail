@@ -80,7 +80,4 @@ describe "Mail::TestMailer" do
     end.should raise_error('At least one recipient (To, Cc or Bcc) is required to send a message')
   end
 
-  it "should save settings passed to initialize" do
-    Mail::TestMailer.new(setting: true).settings.should include(setting: true)
-  end
 end

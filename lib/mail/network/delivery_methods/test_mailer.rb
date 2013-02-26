@@ -30,7 +30,7 @@ module Mail
     end
 
     def initialize(values)
-      @settings = values.dup
+      @settings = {}
     end
     
     attr_accessor :settings
