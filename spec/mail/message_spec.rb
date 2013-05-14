@@ -109,7 +109,7 @@ describe Mail::Message do
 
     it "should raise a warning (and keep parsing) on having an incorrectly formatted header" do
       STDERR.should_receive(:puts).with("WARNING: Could not parse (and so ignoring) 'quite Delivered-To: xxx@xxx.xxx'")
-      Mail.read(fixture('emails', 'plain_emails', 'raw_email_incorrect_header.eml'))
+      Mail.read(fixture('emails', 'plain_emails', 'raw_email_incorrect_header.eml')).to_s
     end
 
     it "should read in an email message and basically parse it" do
@@ -187,44 +187,6 @@ describe Mail::Message do
         deserialized.should be_multipart
         deserialized.parts.each {|part| part.should be_a(Mail::Part)}
         deserialized.parts.map(&:body).should == ['body', '<b>body</b>']
-      end
-    end
-
-    describe "splitting" do
-      it "should split the body from the header" do
-        message = Mail::Message.new("To: Example <example@cirw.in>\r\n\r\nHello there\r\n")
-        message.decoded.should == "Hello there\n"
-      end
-
-      it "should split when the body starts with a space" do
-        message = Mail::Message.new("To: Example <example@cirw.in>\r\n\r\n Hello there\r\n")
-        message.decoded.should == " Hello there\n"
-      end
-
-      it "should split if the body starts with an empty line" do
-        message = Mail::Message.new("To: Example <example@cirw.in>\r\n\r\n\r\nHello there\r\n")
-        message.decoded.should == "\nHello there\n"
-      end
-
-      it "should split if the body starts with a blank line" do
-        message = Mail::Message.new("To: Example <example@cirw.in>\r\n\r\n\t\r\nHello there\r\n")
-        message.decoded.should == "\t\nHello there\n"
-      end
-
-      it 'should split after headers that contain "\r\n "' do
-        message = Mail::Message.new("To: Example\r\n <example@cirw.in>\r\n\r\n Hello there\r\n")
-        message.decoded.should == " Hello there\n"
-      end
-
-      it 'should split only once if there are "\r\n\r\n"s in the body' do
-        message = Mail::Message.new("To: Example <example@cirw.in>\r\n\r\nHello\r\n\r\nthere\r\n")
-        message.decoded.should == "Hello\n\nthere\n"
-      end
-
-      # N.B. this is not in any RFCs
-      it "should split on a line with whitespace on it" do
-        message = Mail::Message.new("To: Example <example@cirw.in>\r\n \r\nHello there\r\n")
-        message.decoded.should == "Hello there\n"
       end
     end
   end
@@ -1575,10 +1537,10 @@ describe Mail::Message do
       mail = Mail.new("Content-Transfer-Encoding: vl@d\r\nReply-To: a b b\r\n")
       mail.errors.should_not be_blank
       mail.errors.size.should eq 2
-      mail.errors[0][0].should eq 'Content-Transfer-Encoding'
-      mail.errors[0][1].should eq 'vl@d'
-      mail.errors[1][0].should eq 'Reply-To'
-      mail.errors[1][1].should eq 'a b b'
+      mail.errors[0][0].should eq 'Reply-To'
+      mail.errors[0][1].should eq 'a b b'
+      mail.errors[1][0].should eq 'Content-Transfer-Encoding'
+      mail.errors[1][1].should eq 'vl@d'
     end
   end
 
@@ -1767,68 +1729,6 @@ describe Mail::Message do
 
     end
 
-  end
-
-  describe 'SMTP envelope From' do
-    it 'should respond' do
-      Mail::Message.new.should respond_to(:smtp_envelope_from)
-    end
-
-    it 'should default to return_path, sender, or first from address' do
-      message = Mail::Message.new do
-        return_path 'return'
-        sender 'sender'
-        from 'from'
-      end
-      message.smtp_envelope_from.should eq 'return'
-
-      message.return_path = nil
-      message.smtp_envelope_from.should eq 'sender'
-
-      message.sender = nil
-      message.smtp_envelope_from.should eq 'from'
-    end
-
-    it 'can be overridden' do
-      message = Mail::Message.new { return_path 'return' }
-
-      message.smtp_envelope_from = 'envelope_from'
-      message.smtp_envelope_from.should eq 'envelope_from'
-
-      message.smtp_envelope_from = 'declared_from'
-      message.smtp_envelope_from.should eq 'declared_from'
-
-      message.smtp_envelope_from = nil
-      message.smtp_envelope_from.should eq 'return'
-    end
-  end
-
-  describe 'SMTP envelope To' do
-    it 'should respond' do
-      Mail::Message.new.should respond_to(:smtp_envelope_to)
-    end
-
-    it 'should default to destinations' do
-      message = Mail::Message.new do
-        to 'to'
-        cc 'cc'
-        bcc 'bcc'
-      end
-      message.smtp_envelope_to.should eq message.destinations
-    end
-
-    it 'can be overridden' do
-      message = Mail::Message.new { to 'to' }
-
-      message.smtp_envelope_to = 'envelope_to'
-      message.smtp_envelope_to.should eq %w(envelope_to)
-
-      message.smtp_envelope_to = 'declared_to'
-      message.smtp_envelope_to.should eq %w(declared_to)
-
-      message.smtp_envelope_to = nil
-      message.smtp_envelope_to.should eq %w(to)
-    end
   end
 
 end
