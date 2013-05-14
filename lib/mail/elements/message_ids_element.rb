@@ -5,7 +5,12 @@ module Mail
     include Mail::Utilities
     
     def initialize(string)
-      @message_ids = Mail::Parsers::MessageIdsParser.new.parse(string).message_ids.map { |msg_id| clean_msg_id(msg_id) }
+      parser = Mail::MessageIdsParser.new
+      if tree = parser.parse(string)
+        @message_ids = tree.message_ids.map { |msg_id| clean_msg_id(msg_id.text_value) }
+      else
+        raise Mail::Field::ParseError.new(MessageIdsElement, string, parser.failure_reason)
+      end
     end
     
     def message_ids

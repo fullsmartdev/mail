@@ -5,9 +5,13 @@ module Mail
     include Mail::Utilities
     
     def initialize( string )
-      received = Mail::Parsers::ReceivedParser.new.parse(string)
-      @date_time = ::DateTime.parse("#{received.date} #{received.time}")
-      @info = received.info
+      parser = Mail::ReceivedParser.new
+      if tree = parser.parse(string)
+        @date_time = ::DateTime.parse("#{tree.date_time.date.text_value} #{tree.date_time.time.text_value}")
+        @info = tree.name_val_list.text_value
+      else
+        raise Mail::Field::ParseError.new(ReceivedElement, string, parser.failure_reason)
+      end
     end
     
     def date_time

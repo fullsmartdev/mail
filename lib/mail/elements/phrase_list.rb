@@ -5,11 +5,16 @@ module Mail
     include Mail::Utilities
     
     def initialize(string)
-      @phrase_lists = Mail::Parsers::PhraseListsParser.new.parse(string)
+      parser = Mail::PhraseListsParser.new
+      if tree = parser.parse(string)
+        @phrases = tree.phrases
+      else
+        raise Mail::Field::ParseError.new(PhraseList, string, parser.failure_reason)
+      end
     end
     
     def phrases
-      @phrase_lists.phrases.map { |p| unquote(p) }
+      @phrases.map { |p| unquote(p.text_value) }
     end
 
   end

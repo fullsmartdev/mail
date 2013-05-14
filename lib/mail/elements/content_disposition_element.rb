@@ -5,9 +5,13 @@ module Mail
     include Mail::Utilities
     
     def initialize( string )
-      content_disposition = Mail::Parsers::ContentDispositionParser.new.parse(cleaned(string))
-      @disposition_type = content_disposition.disposition_type
-      @parameters = content_disposition.parameters
+      parser = Mail::ContentDispositionParser.new
+      if tree = parser.parse(cleaned(string))
+        @disposition_type = tree.disposition_type.text_value.downcase
+        @parameters = tree.parameters
+      else
+        raise Mail::Field::ParseError.new(ContentDispositionElement, string, parser.failure_reason)
+      end
     end
     
     def disposition_type

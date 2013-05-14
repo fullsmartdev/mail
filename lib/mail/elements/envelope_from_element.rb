@@ -5,9 +5,17 @@ module Mail
     include Mail::Utilities
     
     def initialize( string )
-      @envelope_from = Mail::Parsers::EnvelopeFromParser.new.parse(string)
-      @address = @envelope_from.address
-      @date_time = ::DateTime.parse(@envelope_from.ctime_date)
+      parser = Mail::EnvelopeFromParser.new
+      if @tree = parser.parse(string)
+        @address = tree.addr_spec.text_value.strip
+        @date_time = ::DateTime.parse("#{tree.ctime_date.text_value}")
+      else
+        raise Mail::Field::ParseError.new(EnvelopeFromElement, string, parser.failure_reason)
+      end
+    end
+    
+    def tree
+      @tree
     end
     
     def date_time
