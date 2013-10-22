@@ -31,13 +31,11 @@ module Mail
     end
 
     def sort!(order)
-      # stable sort should be used to maintain the relative order as the parts are added
-      i = 0;
-      sorted = self.sort_by do |a|
+      sorted = self.sort do |a, b|
         # OK, 10000 is arbitrary... if anyone actually wants to explicitly sort 10000 parts of a
         # single email message... please show me a use case and I'll put more work into this method,
         # in the meantime, it works :)
-        [get_order_value(a, order), i += 1]
+        get_order_value(a, order) <=> get_order_value(b, order)
       end
       self.clear
       sorted.each { |p| self << p }
