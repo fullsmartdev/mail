@@ -365,7 +365,7 @@ mail.attachments.each do | attachment |
     filename = attachment.filename
     begin
       File.open(images_dir + filename, "w+b", 0644) {|f| f.write attachment.body.decoded}
-    rescue => e
+    rescue Exception => e
       puts "Unable to save data for #{filename} because #{e.message}"
     end
   end
