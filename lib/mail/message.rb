@@ -1975,8 +1975,9 @@ module Mail
     end
 
     def raw_source=(value)
-      value.force_encoding("binary") if RUBY_VERSION >= "1.9.1"
       @raw_source = value.to_crlf
+      @raw_source.force_encoding("binary") if RUBY_VERSION >= "1.9.1"
+      @raw_source
     end
 
     # see comments to body=. We take data and process it lazily
@@ -2129,7 +2130,7 @@ module Mail
         if perform_deliveries
           delivery_method.deliver!(self)
         end
-      rescue Exception => e # Net::SMTP errors or sendmail pipe errors
+      rescue => e # Net::SMTP errors or sendmail pipe errors
         raise e if raise_delivery_errors
       end
     end

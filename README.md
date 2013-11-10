@@ -268,6 +268,15 @@ mail.delivery_method :sendmail
 mail.deliver
 ```
 
+Sending via smtp (for example to [mailcatcher](https://github.com/sj26/mailcatcher))
+```ruby
+
+Mail.defaults do
+  delivery_method :smtp, address: "localhost", port: 1025
+end
+```
+
+
 Exim requires its own delivery manager, and can be used like so:
 
 ```ruby
@@ -365,7 +374,7 @@ mail.attachments.each do | attachment |
     filename = attachment.filename
     begin
       File.open(images_dir + filename, "w+b", 0644) {|f| f.write attachment.body.decoded}
-    rescue Exception => e
+    rescue => e
       puts "Unable to save data for #{filename} because #{e.message}"
     end
   end
