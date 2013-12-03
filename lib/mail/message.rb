@@ -240,7 +240,7 @@ module Mail
     # This method bypasses checking perform_deliveries and raise_delivery_errors,
     # so use with caution.
     #
-    # It still however fires off the interceptors and calls the observers callbacks if they are defined.
+    # It still however fires off the intercepters and calls the observers callbacks if they are defined.
     #
     # Returns self
     def deliver!
@@ -2036,7 +2036,7 @@ module Mail
       add_required_message_fields
       add_multipart_mixed_header    if body.multipart?
       add_content_type              unless has_content_type?
-      add_charset                   unless has_charset?
+      add_charset                   if text? && !has_charset?
       add_content_transfer_encoding unless has_content_transfer_encoding?
     end
 
