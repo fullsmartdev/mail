@@ -230,10 +230,10 @@ easy as:
 
 ```ruby
 Mail.deliver do
-  from     'me@test.lindsaar.net'
-  to       'you@test.lindsaar.net'
-  subject  'Here is the image you wanted'
-  body     File.read('body.txt')
+   from    'me@test.lindsaar.net'
+   to      'you@test.lindsaar.net'
+   subject 'Here is the image you wanted'
+   body    File.read('body.txt')
   add_file '/full/path/to/somefile.png'
 end
 ```
@@ -330,7 +330,7 @@ emails.length #=> LOTS!
 ```ruby
 mail = Mail.read('/path/to/message.eml')
 
-mail.envelope.from   #=> 'mikel@test.lindsaar.net'
+mail.envelope_from   #=> 'mikel@test.lindsaar.net'
 mail.from.addresses  #=> ['mikel@test.lindsaar.net', 'ada@test.lindsaar.net']
 mail.sender.address  #=> 'mikel@test.lindsaar.net'
 mail.to              #=> 'bob@test.lindsaar.net'
