@@ -230,10 +230,10 @@ easy as:
 
 ```ruby
 Mail.deliver do
-   from    'me@test.lindsaar.net'
-   to      'you@test.lindsaar.net'
-   subject 'Here is the image you wanted'
-   body    File.read('body.txt')
+  from     'me@test.lindsaar.net'
+  to       'you@test.lindsaar.net'
+  subject  'Here is the image you wanted'
+  body     File.read('body.txt')
   add_file '/full/path/to/somefile.png'
 end
 ```
@@ -361,7 +361,7 @@ mail.parts[1].content_type_parameters  #=> {'name' => 'my.pdf'}
 Mail generates a tree of parts.  Each message has many or no parts.  Each part
 is another message which can have many or no parts.
 
-A message will only have parts if it is a multipart/mixed or related/mixed
+A message will only have parts if it is a multipart/mixed or multipart/related
 content type and has a boundary defined.
 
 ### Testing and extracting attachments
