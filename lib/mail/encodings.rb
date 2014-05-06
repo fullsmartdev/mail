@@ -7,7 +7,7 @@ module Mail
 
   module Encodings
 
-    include Mail::Constants
+    include Mail::Patterns
     extend  Mail::Utilities
 
     @transfer_encodings = {}
@@ -47,7 +47,7 @@ module Mail
     end
 
     def Encodings.get_name(enc)
-      enc = underscoreize(enc).downcase
+      enc = enc.to_s.gsub("-", "_").downcase
     end
 
     # Encodes a parameter value using URI Escaping, note the language field 'en' can

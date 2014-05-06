@@ -126,7 +126,7 @@ module Mail
       if get_comments.empty?
         nil
       else
-        get_comments.map { |c| c.squeeze(SPACE) }
+        get_comments.map { |c| c.squeeze(" ") }
       end
     end
     
@@ -192,7 +192,7 @@ module Mail
     def strip_all_comments(string)
       unless comments.blank?
         comments.each do |comment|
-          string = string.gsub("(#{comment})", EMPTY)
+          string = string.gsub("(#{comment})", '')
         end
       end
       string.strip

@@ -1,6 +1,6 @@
 # encoding: us-ascii
 module Mail
-  module Constants
+  module Patterns
     white_space = %Q|\x9\x20|
     text        = %Q|\x1-\x8\xB\xC\xE-\x7f|
     field_name  = %Q|\x21-\x39\x3b-\x7e|
@@ -33,18 +33,5 @@ module Mail
     ATOM_UNSAFE   = /[#{Regexp.quote aspecial}#{control}#{sp}]/n
     PHRASE_UNSAFE = /[#{Regexp.quote aspecial}#{control}]/n
     TOKEN_UNSAFE  = /[#{Regexp.quote tspecial}#{control}#{sp}]/n
-
-    EMPTY          = ''
-    SPACE          = ' '
-    UNDERSCORE     = '_'
-    HYPHEN         = '-'
-    COLON          = ':'
-    ASTERISK       = '*'
-    CR             = "\r"
-    LF             = "\n"
-    CR_ENCODED     = "=0D"
-    LF_ENCODED     = "=0A"
-    CAPITAL_M      = 'M'
-    EQUAL_LF       = "=\n"
   end
 end

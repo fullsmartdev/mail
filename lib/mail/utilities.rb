@@ -1,8 +1,8 @@
 # encoding: utf-8
 module Mail
   module Utilities
-    include Constants
-
+    include Patterns
+    
     # Returns true if the string supplied is free from characters not allowed as an ATOM
     def atom_safe?( str )
       not ATOM_UNSAFE === str
@@ -177,7 +177,7 @@ module Mail
     #  string = :resent_from_field
     #  dasherize ( string ) #=> 'resent_from_field'
     def dasherize( str )
-      str.to_s.tr(UNDERSCORE, HYPHEN)
+      str.to_s.gsub('_', '-')
     end
 
     # Swaps out all hyphens (-) for underscores (_) good for stringing to symbols
@@ -188,7 +188,7 @@ module Mail
     #  string = :resent_from_field
     #  underscoreize ( string ) #=> 'resent_from_field'
     def underscoreize( str )
-      str.to_s.downcase.tr(HYPHEN, UNDERSCORE)
+      str.to_s.downcase.gsub('-', '_')
     end
 
     if RUBY_VERSION <= '1.8.6'
