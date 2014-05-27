@@ -1,6 +1,4 @@
-if !ENV["APPRAISAL_INITIALIZED"] && !ENV["TRAVIS"]
-  ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../Gemfile', __FILE__)
-end
+ENV['BUNDLE_GEMFILE'] = File.expand_path('../Gemfile', __FILE__)
 require 'rubygems'
 require 'bundler/setup'
 
@@ -17,12 +15,6 @@ task :default => :spec
 RSpec::Core::RakeTask.new(:spec) do |t|
   t.ruby_opts = '-w'
   t.rspec_opts = %w(--backtrace --color)
-end
-
-begin
-  require "appraisal"
-rescue LoadError
-  warn "Appraisal is only available in test/development"
 end
 
 # load custom rake tasks

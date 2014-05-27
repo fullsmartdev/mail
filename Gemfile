@@ -1,15 +1,12 @@
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
 gemspec
 
-gem "tlsmail", "~> 0.0.1" if RUBY_VERSION <= "1.8.6"
-gem "jruby-openssl", :platforms => :jruby
+gem "mime-types", "~> 1.16"
+gem "tlsmail" if RUBY_VERSION <= '1.8.6'
 
-group :development, :test do
-  gem "appraisal", "~> 1.0"
-end
+gem 'jruby-openssl', :platform => :jruby
 
-# For gems not required to run tests
-group :local_development, :test do
-  gem "ruby-debug", :platforms => :mri_18
+group :test do
+  gem "ruby-debug", :platform => :mri_18
 end
