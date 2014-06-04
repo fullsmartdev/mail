@@ -66,20 +66,11 @@ describe Mail::CommonField do
       expect(field.encoded).to eq result
       expect(field.decoded).to eq value
     end
-
+    
   end
 
-  context "when including the field name" do
-    it "does not strip out content that looks identitcal to the field name" do
-      field = Mail::SubjectField.new("Subject: Subject: for your approval")
-      expect(field.decoded).to eq("Subject: for your approval")
-    end
-  end
-
-  context "when not including the field name" do
-    it "does not strip out content that looks identitcal to the field name" do
-      field = Mail::SubjectField.new("This is an important subject: here")
-      expect(field.decoded).to eq("This is an important subject: here")
-    end
+  it "does not strip out content that looks identitcal to the field name" do
+    field = Mail::SubjectField.new("Subject: Subject: for your approval")
+    expect(field.decoded).to eq("Subject: for your approval")
   end
 end
