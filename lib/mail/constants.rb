@@ -33,7 +33,6 @@ module Mail
     ATOM_UNSAFE   = /[#{Regexp.quote aspecial}#{control}#{sp}]/n
     PHRASE_UNSAFE = /[#{Regexp.quote aspecial}#{control}]/n
     TOKEN_UNSAFE  = /[#{Regexp.quote tspecial}#{control}#{sp}]/n
-    ENCODED_VALUE = /\=\?[^?]+\?([QB])\?[^?]*?\?\=/mi
 
     EMPTY          = ''
     SPACE          = ' '
@@ -47,7 +46,5 @@ module Mail
     LF_ENCODED     = "=0A"
     CAPITAL_M      = 'M'
     EQUAL_LF       = "=\n"
-    Q_VALUES       = ['Q','q']
-    B_VALUES       = ['B','b']
   end
 end
