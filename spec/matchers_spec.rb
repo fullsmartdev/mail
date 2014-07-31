@@ -22,11 +22,6 @@ describe "have_sent_email" do
     end
   end
 
-  before(:each) do
-    Mail::TestMailer.deliveries.clear
-    send_test_email
-  end
-
   after(:all) do
     # Although this breaks encapsulation, it's the easiest way to ensure
     # that the delivery method is _exactly_ what it was before we started
@@ -47,6 +42,7 @@ describe "have_sent_email" do
 
     context "when e-mail has been sent" do
       before(:each) do
+        send_test_email
         expect(Mail::TestMailer.deliveries).not_to be_empty
       end
 
