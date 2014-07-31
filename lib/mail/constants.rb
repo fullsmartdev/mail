@@ -46,6 +46,5 @@ module Mail
     LF_ENCODED     = "=0A"
     CAPITAL_M      = 'M'
     EQUAL_LF       = "=\n"
-    NULL_SENDER    = '<>'
   end
 end
