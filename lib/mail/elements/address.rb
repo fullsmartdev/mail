@@ -167,10 +167,6 @@ module Mail
       format
     end
 
-    def group
-      @data && @data.group
-    end
-
     private
     
     def parse(value = nil)
