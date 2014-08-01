@@ -57,6 +57,9 @@ module Mail
       end
       decoded = str.encode("utf-8", :invalid => :replace, :replace => "")
       decoded.valid_encoding? ? decoded : decoded.encode("utf-16le", :invalid => :replace, :replace => "").encode("utf-8")
+    rescue Encoding::UndefinedConversionError, ArgumentError, Encoding::ConverterNotFoundError
+      warn "Encoding conversion failed #{$!}"
+      str.dup.force_encoding("utf-8")
     end
 
     def Ruby19.q_value_encode(str, encoding = nil)
@@ -79,7 +82,8 @@ module Mail
       end
       decoded = str.encode("utf-8", :invalid => :replace, :replace => "")
       decoded.valid_encoding? ? decoded : decoded.encode("utf-16le", :invalid => :replace, :replace => "").encode("utf-8")
-    rescue Encoding::UndefinedConversionError
+    rescue Encoding::UndefinedConversionError, ArgumentError, Encoding::ConverterNotFoundError
+      warn "Encoding conversion failed #{$!}"
       str.dup.force_encoding("utf-8")
     end
 
@@ -123,10 +127,6 @@ module Mail
       # UTF-8, UTF-32BE and alike
       when /utf[\-_]?(\d{1,2})?(\w{1,2})/i
         "UTF-#{$1}#{$2}".gsub(/\A(UTF-(?:16|32))\z/, '\\1BE')
-
-      # Windows-1258 is similar to 1252
-      when /Windows-?1258/i
-        "Windows-1252"
 
       # Windows-1252 and alike
       when /Windows-?(.*)/i
