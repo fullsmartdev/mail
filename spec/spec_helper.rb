@@ -30,10 +30,12 @@ end
 # NOTE: We set the KCODE manually here in 1.8.X because upgrading to rspec-2.8.0 caused it
 #       to default to "NONE" (Why!?).
 $KCODE='UTF8' if RUBY_VERSION < '1.9'
-
 if defined?(Encoding) && Encoding.respond_to?(:default_external=)
-  Mail::Parsers::Ragel::Ruby.silence_warnings do
+  begin
+    old, $VERBOSE = $VERBOSE, nil
     Encoding.default_external = 'utf-8'
+  ensure
+    $VERBOSE = old
   end
 end
 

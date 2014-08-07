@@ -70,14 +70,6 @@ describe Mail::Message do
       Mail.read(fixture('emails', 'error_emails', 'bad_subject.eml')).subject
     end
 
-    it 'should use default charset' do
-      begin
-        Mail::Message.default_charset, old = 'iso-8859-1', Mail::Message.default_charset
-        expect(Mail::Message.new.charset).to eq 'iso-8859-1'
-      ensure
-        Mail::Message.default_charset = old
-      end
-    end
 
     it 'should be able to parse an email missing an encoding' do
       Mail.read(fixture('emails', 'error_emails', 'must_supply_encoding.eml'))
@@ -348,12 +340,21 @@ describe Mail::Message do
     end
 
     it "should parse non-UTF8 sources" do
-      raw_message = File.read(fixture('emails', 'multi_charset', 'japanese_shiftjis.eml'))
+      raw_message = File.read(fixture('emails', 'multi_charset', 'japanese_iso_2022.eml'))
       original_encoding = raw_message.encoding if raw_message.respond_to?(:encoding)
       mail = Mail.new(raw_message)
       expect(mail.to).to eq ["raasdnil@gmail.com"]
       expect(mail.decoded).to eq "すみません。\n\n"
       expect(raw_message.encoding).to eq original_encoding if raw_message.respond_to?(:encoding)
+    end
+
+    if '1.9+'.respond_to?(:encoding)
+      it "should be able to normalize CRLFs on non-UTF8 encodings" do
+        File.open(fixture('emails', 'multi_charset', 'japanese_shift_jis.eml')) do |io|
+          mail = Mail.new(io.read)
+          expect(mail.raw_source.encoding).to eq Encoding::BINARY
+        end
+      end
     end
   end
 
