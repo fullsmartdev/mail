@@ -23,55 +23,55 @@ describe Mail::DateField do
   describe "initialization" do
 
     it "should initialize" do
-      expect { Mail::DateField.new("12 Aug 2009 00:00:02 GMT") }.not_to raise_error
+      doing { Mail::DateField.new("12 Aug 2009 00:00:02 GMT") }.should_not raise_error
     end
 
     it "should be able to tell the time" do
-      expect(Mail::DateField.new("12 Aug 2009 00:00:02 GMT").date_time.class).to eq DateTime
+      Mail::DateField.new("12 Aug 2009 00:00:02 GMT").date_time.class.should eq DateTime
     end
 
     it "should mix in the CommonAddress module" do
-      expect(Mail::DateField.included_modules).to include(Mail::CommonDate) 
+      Mail::DateField.included_modules.should include(Mail::CommonDate) 
     end
 
     it "should accept a string with the field name" do
       t = Mail::DateField.new('Date: 12 Aug 2009 00:00:02 GMT')
-      expect(t.name).to eq 'Date'
-      expect(t.value).to eq 'Wed, 12 Aug 2009 00:00:02 +0000'
-      expect(t.date_time).to eq ::DateTime.parse('12 Aug 2009 00:00:02 GMT')
+      t.name.should eq 'Date'
+      t.value.should eq 'Wed, 12 Aug 2009 00:00:02 +0000'
+      t.date_time.should eq ::DateTime.parse('12 Aug 2009 00:00:02 GMT')
     end
 
     it "should accept a string without the field name" do
       t = Mail::DateField.new('12 Aug 2009 00:00:02 GMT')
-      expect(t.name).to eq 'Date'
-      expect(t.value).to eq 'Wed, 12 Aug 2009 00:00:02 +0000'
-      expect(t.date_time).to eq ::DateTime.parse('12 Aug 2009 00:00:02 GMT')
+      t.name.should eq 'Date'
+      t.value.should eq 'Wed, 12 Aug 2009 00:00:02 +0000'
+      t.date_time.should eq ::DateTime.parse('12 Aug 2009 00:00:02 GMT')
     end
     
     it "should accept nil as a value" do
       t = Mail::DateField.new(nil)
-      expect(t.date_time).not_to be_nil
+      t.date_time.should_not be_nil
     end
     
     it "should allow us to encode an date field" do
       field = Mail::DateField.new('12 Aug 2009 00:00:02 GMT')
-      expect(field.encoded).to eq "Date: Wed, 12 Aug 2009 00:00:02 +0000\r\n"
+      field.encoded.should eq "Date: Wed, 12 Aug 2009 00:00:02 +0000\r\n"
     end
     
     it "should allow us to decode an address field" do
       field = Mail::DateField.new('12 Aug 2009 00:00:02 GMT')
-      expect(field.decoded).to eq "Wed, 12 Aug 2009 00:00:02 +0000"
+      field.decoded.should eq "Wed, 12 Aug 2009 00:00:02 +0000"
     end
 
     it "should be able to parse a really bad spacing example" do
       field = Mail::DateField.new("Fri, 21 Nov 1997 09(comment):   55  :  06 -0600")
-      expect(field.decoded).to eq "Fri, 21 Nov 1997 09:55:06 -0600"
+      field.decoded.should eq "Fri, 21 Nov 1997 09:55:06 -0600"
     end
 
     it "should give today's date if no date is specified" do
-      now = DateTime.now
-      expect(DateTime).to receive(:now).at_least(:once).and_return(now)
-      expect(Mail::DateField.new.date_time).to eq ::DateTime.parse(now.to_s)
+      now = Time.now
+      Time.stub!(:now).and_return(now)
+      Mail::DateField.new.date_time.should eq ::DateTime.parse(now.to_s)
     end
     
   end

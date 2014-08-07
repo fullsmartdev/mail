@@ -3,37 +3,37 @@ require 'spec_helper'
 
 describe Mail::ResentDateField do
   it "should initialize" do
-    expect { Mail::ResentDateField.new("12 Aug 2009 00:00:02 GMT") }.not_to raise_error
+    doing { Mail::ResentDateField.new("12 Aug 2009 00:00:02 GMT") }.should_not raise_error
   end
   
   it "should be able to tell the time" do
-    expect(Mail::ResentDateField.new("12 Aug 2009 00:00:02 GMT").date_time.class).to eq DateTime
+    Mail::ResentDateField.new("12 Aug 2009 00:00:02 GMT").date_time.class.should eq DateTime
   end
   
   it "should mix in the CommonAddress module" do
-    expect(Mail::ResentDateField.included_modules).to include(Mail::CommonDate) 
+    Mail::ResentDateField.included_modules.should include(Mail::CommonDate) 
   end
 
   it "should accept a string with the field name" do
     t = Mail::ResentDateField.new('Resent-Date: 12 Aug 2009 00:00:02 GMT')
-    expect(t.name).to eq 'Resent-Date'
-    expect(t.value).to eq 'Wed, 12 Aug 2009 00:00:02 +0000'
-    expect(t.date_time).to eq ::DateTime.parse('12 Aug 2009 00:00:02 GMT')
+    t.name.should eq 'Resent-Date'
+    t.value.should eq 'Wed, 12 Aug 2009 00:00:02 +0000'
+    t.date_time.should eq ::DateTime.parse('12 Aug 2009 00:00:02 GMT')
   end
   
   it "should accept a string without the field name" do
     t = Mail::ResentDateField.new('12 Aug 2009 00:00:02 GMT')
-    expect(t.name).to eq 'Resent-Date'
-    expect(t.value).to eq 'Wed, 12 Aug 2009 00:00:02 +0000'
-    expect(t.date_time).to eq ::DateTime.parse('12 Aug 2009 00:00:02 GMT')
+    t.name.should eq 'Resent-Date'
+    t.value.should eq 'Wed, 12 Aug 2009 00:00:02 +0000'
+    t.date_time.should eq ::DateTime.parse('12 Aug 2009 00:00:02 GMT')
   end
   
   it "should give today's date if no date is specified" do
-    now = DateTime.now
-    expect(DateTime).to receive(:now).at_least(:once).and_return(now)
+    now = Time.now
+    Time.stub!(:now).and_return(now)
     t = Mail::ResentDateField.new
-    expect(t.name).to eq 'Resent-Date'
-    expect(t.date_time).to eq ::DateTime.parse(now.to_s)
+    t.name.should eq 'Resent-Date'
+    t.date_time.should eq ::DateTime.parse(now.to_s)
   end
 
 end

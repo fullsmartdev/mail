@@ -6,12 +6,12 @@ describe "multibyte/chars" do
 
   it "should upcase" do
     chars = Chars.new('Laurent, où sont les tests ?')
-    expect(chars.upcase).to eq("LAURENT, OÙ SONT LES TESTS ?")
+    chars.upcase.should == "LAURENT, OÙ SONT LES TESTS ?"
   end
 
   it "should downcase" do
     chars = Chars.new('VĚDA A VÝZKUM')
-    expect(chars.downcase).to eq("věda a výzkum")
+    chars.downcase.should == "věda a výzkum"
   end
 end
 

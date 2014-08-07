@@ -24,9 +24,9 @@ describe "SMTP Delivery Method" do
       smtp_envelope_to 'smtp_to'
     end
 
-    expect(MockSMTP.deliveries[0][0]).to eq mail.encoded
-    expect(MockSMTP.deliveries[0][1]).to eq 'smtp_from'
-    expect(MockSMTP.deliveries[0][2]).to eq %w(smtp_to)
+    MockSMTP.deliveries[0][0].should eq mail.encoded
+    MockSMTP.deliveries[0][1].should eq 'smtp_from'
+    MockSMTP.deliveries[0][2].should eq %w(smtp_to)
   end
 
   it "should be able to return actual SMTP protocol response" do
@@ -42,7 +42,7 @@ describe "SMTP Delivery Method" do
     end
 
     response = mail.deliver!
-    expect(response).to eq 'OK'
+    response.should eq 'OK'
 
   end
 
@@ -53,13 +53,13 @@ describe "SMTP Delivery Method" do
       delivery_method :smtp_connection, :connection => smtp, :port => 587, :return_response => true
     end
 
-    expect do
+    lambda do
       Mail.deliver do
         to "to@somemail.com"
         subject "Email with no sender"
         body "body"
       end
-    end.to raise_error('An SMTP From address is required to send a message. Set the message smtp_envelope_from, return_path, sender, or from address.')
+    end.should raise_error('An SMTP From address is required to send a message. Set the message smtp_envelope_from, return_path, sender, or from address.')
   end
 
   it "should raise an error if no recipient if defined" do
@@ -68,12 +68,12 @@ describe "SMTP Delivery Method" do
       delivery_method :smtp_connection, :connection => smtp, :port => 587, :return_response => true
     end
 
-    expect do
+    lambda do
       Mail.deliver do
         from "from@somemail.com"
         subject "Email with no recipient"
         body "body"
       end
-    end.to raise_error('An SMTP To address is required to send a message. Set the message smtp_envelope_to, to, cc, or bcc address.')
+    end.should raise_error('An SMTP To address is required to send a message. Set the message smtp_envelope_to, to, cc, or bcc address.')
   end
 end

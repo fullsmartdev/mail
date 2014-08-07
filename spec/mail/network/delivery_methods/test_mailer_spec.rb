@@ -20,7 +20,7 @@ describe "Mail::TestMailer" do
     Mail.defaults do
       delivery_method :test
     end
-    expect(Mail::TestMailer.deliveries).to be_empty
+    Mail::TestMailer.deliveries.should be_empty
   end
 
   it "should deliver an email to the Mail::TestMailer.deliveries array" do
@@ -34,8 +34,8 @@ describe "Mail::TestMailer" do
       body 'hello'
     end
     mail.deliver
-    expect(Mail::TestMailer.deliveries.length).to eq 1
-    expect(Mail::TestMailer.deliveries.first).to eq mail
+    Mail::TestMailer.deliveries.length.should eq 1
+    Mail::TestMailer.deliveries.first.should eq mail
   end
 
   it "should clear the deliveries when told to" do
@@ -49,38 +49,38 @@ describe "Mail::TestMailer" do
       body 'hello'
     end
     mail.deliver
-    expect(Mail::TestMailer.deliveries.length).to eq 1
+    Mail::TestMailer.deliveries.length.should eq 1
     Mail::TestMailer.deliveries.clear
-    expect(Mail::TestMailer.deliveries).to be_empty
+    Mail::TestMailer.deliveries.should be_empty
   end
 
   it "should raise an error if no sender is defined" do
     Mail.defaults do
       delivery_method :test
     end
-    expect do
+    lambda do
       Mail.deliver do
         to "to@somemail.com"
         subject "Email with no sender"
         body "body"
       end
-    end.to raise_error('An SMTP From address is required to send a message. Set the message smtp_envelope_from, return_path, sender, or from address.')
+    end.should raise_error('An SMTP From address is required to send a message. Set the message smtp_envelope_from, return_path, sender, or from address.')
   end
 
   it "should raise an error if no recipient if defined" do
     Mail.defaults do
       delivery_method :test
     end
-    expect do
+    lambda do
       Mail.deliver do
         from "from@somemail.com"
         subject "Email with no recipient"
         body "body"
       end
-    end.to raise_error('An SMTP To address is required to send a message. Set the message smtp_envelope_to, to, cc, or bcc address.')
+    end.should raise_error('An SMTP To address is required to send a message. Set the message smtp_envelope_to, to, cc, or bcc address.')
   end
 
   it "should save settings passed to initialize" do
-    expect(Mail::TestMailer.new(:setting => true).settings).to include(:setting => true)
+    Mail::TestMailer.new(:setting => true).settings.should include(:setting => true)
   end
 end

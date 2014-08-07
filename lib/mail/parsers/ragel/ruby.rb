@@ -3,12 +3,11 @@ module Mail
     module Ragel
       module Ruby
         def self.silence_warnings
-          old, $VERBOSE = $VERBOSE, nil
+          original_verbose = $VERBOSE
+          $VERBOSE = nil
           yield
-        ensure
-          $VERBOSE = old
+          $VERBOSE = original_verbose
         end
-
         # Ragel-generated parsers give a lot of warnings
         # and may cause logs to balloon in size
         silence_warnings do

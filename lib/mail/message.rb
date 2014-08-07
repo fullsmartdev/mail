@@ -46,7 +46,7 @@ module Mail
   #   (i.e., a line with nothing preceding the CRLF).
   class Message
 
-    include Constants
+    include Patterns
     include Utilities
 
     # ==Making an email
@@ -105,7 +105,7 @@ module Mail
       @html_part = nil
       @errors = nil
       @header = nil
-      @charset = self.class.default_charset
+      @charset = 'UTF-8'
       @defaulted_charset = true
 
       @smtp_envelope_from = nil
@@ -206,10 +206,6 @@ module Mail
     # This setting is ignored by mail (though still available as a flag) if you
     # define a delivery_handler
     attr_accessor :raise_delivery_errors
-
-    def self.default_charset; @@default_charset; end
-    def self.default_charset=(charset); @@default_charset = charset; end
-    self.default_charset = 'UTF-8'
 
     def register_for_delivery_notification(observer)
       STDERR.puts("Message#register_for_delivery_notification is deprecated, please call Mail.register_observer instead")
@@ -1967,8 +1963,6 @@ module Mail
 
   private
 
-    HEADER_SEPARATOR = /#{CRLF}#{CRLF}|#{CRLF}#{WSP}*#{CRLF}(?!#{WSP})/m
-
     #  2.1. General Description
     #   A message consists of header fields (collectively called "the header
     #   of the message") followed, optionally, by a body.  The header is a
@@ -1980,7 +1974,7 @@ module Mail
     # Additionally, I allow for the case where someone might have put whitespace
     # on the "gap line"
     def parse_message
-      header_part, body_part = raw_source.lstrip.split(HEADER_SEPARATOR, 2)
+      header_part, body_part = raw_source.lstrip.split(/#{CRLF}#{CRLF}|#{CRLF}#{WSP}*#{CRLF}(?!#{WSP})/m, 2)
       self.header = header_part
       self.body   = body_part
     end
