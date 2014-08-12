@@ -25,6 +25,7 @@ module Mail
       if value.nil?
         @parsed = false
         @data = nil
+        return
       else
         parse(value)
       end
@@ -46,11 +47,11 @@ module Mail
     def format
       parse unless @parsed
       if @data.nil?
-        EMPTY
+        ''
       elsif display_name
-        [quote_phrase(display_name), "<#{address}>", format_comments].compact.join(SPACE)
+        [quote_phrase(display_name), "<#{address}>", format_comments].compact.join(" ")
       elsif address
-        [address, format_comments].compact.join(SPACE)
+        [address, format_comments].compact.join(" ")
       else
         raw
       end
@@ -122,7 +123,11 @@ module Mail
     #  a.comments #=> ['My email address']
     def comments
       parse unless @parsed
-      get_comments.map { |c| c.squeeze(SPACE) } unless get_comments.empty?
+      if get_comments.empty?
+        nil
+      else
+        get_comments.map { |c| c.squeeze(SPACE) }
+      end
     end
     
     # Sometimes an address will not have a display name, but might have the name
@@ -170,13 +175,18 @@ module Mail
     
     def parse(value = nil)
       @parsed = true
-      @data = nil
 
       case value
+      when NilClass
+        @data = nil
+        nil
       when Mail::Parsers::AddressStruct
         @data = value
       when String
-        unless value.blank?
+        @raw_text = value
+        if value.blank?
+          @data = nil
+        else
           address_list = Mail::Parsers::AddressListsParser.new.parse(value)
           @data = address_list.addresses.first
         end
@@ -196,7 +206,7 @@ module Mail
       unless comments.blank?
         comments.each do |comment|
           if @data.domain && @data.domain.include?("(#{comment})")
-            value = value.gsub("(#{comment})", EMPTY)
+            value = value.gsub("(#{comment})", '')
           end
         end
       end
@@ -206,26 +216,43 @@ module Mail
     def get_display_name
       if @data.display_name
         str = strip_all_comments(@data.display_name.to_s)
-      elsif @data.comments && @data.domain
-        str = strip_domain_comments(format_comments)
+      elsif @data.comments
+        if @data.domain
+          str = strip_domain_comments(format_comments)
+        else
+          str = nil
+        end
+      else
+        nil
       end
-
-      str unless str.blank?
+      
+      if str.blank?
+        nil
+      else
+        str
+      end
     end
     
     def get_name
       if display_name
         str = display_name
-      elsif comments
-        str = "(#{comments.join(SPACE).squeeze(SPACE)})"
+      else
+        if comments
+          comment_text = comments.join(' ').squeeze(" ")
+          str = "(#{comment_text})"
+        end
       end
 
-      unparen(str) unless str.blank?
+      if str.blank?
+        nil
+      else
+        unparen(str)
+      end
     end
     
     def format_comments
       if comments
-        comment_text = comments.map {|c| escape_paren(c) }.join(SPACE).squeeze(SPACE)
+        comment_text = comments.map {|c| escape_paren(c) }.join(' ').squeeze(" ")
         @format_comments ||= "(#{comment_text})"
       else
         nil
