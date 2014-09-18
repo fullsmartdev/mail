@@ -76,13 +76,14 @@ module Mail # :doc:
 
   require 'mail/envelope'
 
-  register_autoload :Parsers, "mail/parsers"
+  require 'mail/parsers'
 
   # Autoload header field elements and transfer encodings.
   require 'mail/elements'
   require 'mail/encodings'
   require 'mail/encodings/base64'
   require 'mail/encodings/quoted_printable'
+  require 'mail/encodings/unix_to_unix'
 
   require 'mail/matchers/has_sent_mail'
 
