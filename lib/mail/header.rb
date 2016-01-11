@@ -49,7 +49,7 @@ module Mail
     # me the example so we can fix it.
     def initialize(header_text = nil, charset = nil)
       @charset = charset
-      self.raw_source = ::Mail::Utilities.to_crlf(header_text).lstrip
+      self.raw_source = header_text.to_crlf.lstrip
       split_header if header_text
     end
 
@@ -136,7 +136,7 @@ module Mail
       case
       when selected.length > 1
         selected.map { |f| f }
-      when !Utilities.blank?(selected)
+      when !selected.blank?
         selected.first
       else
         nil
@@ -166,11 +166,11 @@ module Mail
       
       case
       # User wants to delete the field
-      when !Utilities.blank?(selected) && value == nil
+      when !selected.blank? && value == nil
         fields.delete_if { |f| selected.include?(f) }
         
       # User wants to change the field
-      when !Utilities.blank?(selected) && limited_field?(fn)
+      when !selected.blank? && limited_field?(fn)
         selected.first.update(fn, value)
         
       # User wants to create the field
@@ -204,7 +204,7 @@ module Mail
                            content-id content-disposition content-location]
 
     def encoded
-      buffer = String.new
+      buffer = ''
       buffer.force_encoding('us-ascii') if buffer.respond_to?(:force_encoding)
       fields.each do |field|
         buffer << field.encoded

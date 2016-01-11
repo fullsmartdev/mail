@@ -43,7 +43,7 @@ module Mail
 
     def self.call(path, arguments, destinations, mail)
       popen "#{path} #{arguments}" do |io|
-        io.puts ::Mail::Utilities.to_lf(mail.encoded)
+        io.puts mail.encoded.to_lf
         io.flush
       end
     end

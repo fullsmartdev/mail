@@ -178,16 +178,16 @@ describe "IMAP Retriever" do
       retrievable = Mail::IMAP.new({})
       options = retrievable.send(:validate_options, {})
 
-      expect(Mail::Utilities.blank?(options[:count])).not_to be_truthy
+      expect(options[:count]).not_to be_blank
       expect(options[:count]).to eq 10
 
-      expect(Mail::Utilities.blank?(options[:order])).not_to be_truthy
+      expect(options[:order]).not_to be_blank
       expect(options[:order]).to eq :asc
 
-      expect(Mail::Utilities.blank?(options[:what])).not_to be_truthy
+      expect(options[:what]).not_to be_blank
       expect(options[:what]).to eq :first
 
-      expect(Mail::Utilities.blank?(options[:mailbox])).not_to be_truthy
+      expect(options[:mailbox]).not_to be_blank
       expect(options[:mailbox]).to eq 'INBOX'
     end
     it "should not replace given configuration" do
@@ -199,16 +199,16 @@ describe "IMAP Retriever" do
         :what => :first
       })
 
-      expect(Mail::Utilities.blank?(options[:count])).not_to be_truthy
+      expect(options[:count]).not_to be_blank
       expect(options[:count]).to eq 2
 
-      expect(Mail::Utilities.blank?(options[:order])).not_to be_truthy
+      expect(options[:order]).not_to be_blank
       expect(options[:order]).to eq :asc
 
-      expect(Mail::Utilities.blank?(options[:what])).not_to be_truthy
+      expect(options[:what]).not_to be_blank
       expect(options[:what]).to eq :first
 
-      expect(Mail::Utilities.blank?(options[:mailbox])).not_to be_truthy
+      expect(options[:mailbox]).not_to be_blank
       expect(options[:mailbox]).to eq 'some/mail/box'
     end
     it "should ensure utf7 conversion for mailbox names" do

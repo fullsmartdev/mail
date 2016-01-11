@@ -5,7 +5,7 @@ module Mail
   module CommonAddress # :nodoc:
       
     def parse(val = value)
-      unless Utilities.blank?(val)
+      unless val.blank?
         @address_list = AddressList.new(encode_if_needed(val))
       else
         nil
@@ -84,10 +84,10 @@ module Mail
       case
       when val.nil?
         raise ArgumentError, "Need to pass an address to <<"
-      when Utilities.blank?(val)
+      when val.blank?
         parse(encoded)
       else
-        self.value = [self.value, val].reject {|a| Utilities.blank?(a) }.join(", ")
+        self.value = [self.value, val].reject {|a| a.blank? }.join(", ")
       end
     end
 
@@ -99,22 +99,22 @@ module Mail
     private
   
     def do_encode(field_name)
-      return '' if Utilities.blank?(value)
+      return '' if value.blank?
       address_array = address_list.addresses.reject { |a| encoded_group_addresses.include?(a.encoded) }.compact.map { |a| a.encoded }
       address_text  = address_array.join(", \r\n\s")
       group_array = groups.map { |k,v| "#{k}: #{v.map { |a| a.encoded }.join(", \r\n\s")};" }
       group_text  = group_array.join(" \r\n\s")
-      return_array = [address_text, group_text].reject { |a| Utilities.blank?(a) }
+      return_array = [address_text, group_text].reject { |a| a.blank? }
       "#{field_name}: #{return_array.join(", \r\n\s")}\r\n"
     end
 
     def do_decode
-      return nil if Utilities.blank?(value)
+      return nil if value.blank?
       address_array = address_list.addresses.reject { |a| decoded_group_addresses.include?(a.decoded) }.map { |a| a.decoded }
       address_text  = address_array.join(", ")
       group_array = groups.map { |k,v| "#{k}: #{v.map { |a| a.decoded }.join(", ")};" }
       group_text  = group_array.join(" ")
-      return_array = [address_text, group_text].reject { |a| Utilities.blank?(a) }
+      return_array = [address_text, group_text].reject { |a| a.blank? }
       return_array.join(", ")
     end
 

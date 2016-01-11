@@ -33,7 +33,7 @@ module Mail
       @charset  = nil
       @part_sort_order = [ "text/plain", "text/enriched", "text/html" ]
       @parts = Mail::PartsList.new
-      if Utilities.blank?(string)
+      if string.blank?
         @raw_source = ''
       else
         # Do join first incase we have been given an Array in Ruby 1.9
@@ -201,7 +201,7 @@ module Mail
     end
     
     def encoding=( val )
-      @encoding = if val == "text" || Utilities.blank?(val)
+      @encoding = if val == "text" || val.blank?
           (only_us_ascii? ? '7bit' : '8bit')
       else
           val
@@ -291,7 +291,7 @@ module Mail
         (?=\s*$)                              # lookahead matching zero or more spaces followed by line-ending
       /x
       parts = raw_source.split(parts_regex).each_slice(2).to_a
-      parts.each_with_index { |(part, _), index| parts.delete_at(index) if index > 0 && Utilities.blank?(part) }
+      parts.each_with_index { |(part, _), index| parts.delete_at(index) if index > 0 && part.blank? }
 
       if parts.size > 1
         final_separator = parts[-2][1]

@@ -12,12 +12,12 @@ module Mail
       
       # Decode the string
       def self.decode(str)
-        ::Mail::Utilities.to_lf str
+        str.to_lf
       end
     
       # Encode the string
       def self.encode(str)
-        ::Mail::Utilities.to_crlf str
+        str.to_crlf
       end
      
       # Idenity encodings have a fixed cost, 1 byte out per 1 byte in

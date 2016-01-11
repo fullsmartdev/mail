@@ -172,13 +172,13 @@ describe "POP3 Retriever" do
       retrievable = Mail::POP3.new({})
       options = retrievable.send(:validate_options, {})
       
-      expect(Mail::Utilities.blank?(options[:count])).not_to be_truthy
+      expect(options[:count]).not_to be_blank
       expect(options[:count]).to eq 10
       
-      expect(Mail::Utilities.blank?(options[:order])).not_to be_truthy
+      expect(options[:order]).not_to be_blank
       expect(options[:order]).to eq :asc
       
-      expect(Mail::Utilities.blank?(options[:what])).not_to be_truthy
+      expect(options[:what]).not_to be_blank
       expect(options[:what]).to eq :first
     end
     
@@ -190,13 +190,13 @@ describe "POP3 Retriever" do
         :what => :first
       })
       
-      expect(Mail::Utilities.blank?(options[:count])).not_to be_truthy
+      expect(options[:count]).not_to be_blank
       expect(options[:count]).to eq 2
       
-      expect(Mail::Utilities.blank?(options[:order])).not_to be_truthy
+      expect(options[:order]).not_to be_blank
       expect(options[:order]).to eq :asc
       
-      expect(Mail::Utilities.blank?(options[:what])).not_to be_truthy
+      expect(options[:what]).not_to be_blank
       expect(options[:what]).to eq :first
     end
     

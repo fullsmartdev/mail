@@ -40,7 +40,7 @@ describe "Attachments" do
 
     it "should assign mime-encoded multibyte filename" do
       @mail.attachments['てすと.txt'] = File.open(fixture('attachments', 'てすと.txt'), 'rb', &:read)
-      expect(Mail::Utilities.blank?(@mail.attachments)).not_to eq true
+      expect(@mail.attachments).not_to be_blank
       expect(Mail::Encodings.decode_encode(@mail.attachments[0].filename, :decode)).to eq 'てすと.txt'
     end
   end

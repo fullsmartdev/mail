@@ -33,7 +33,7 @@ module Mail
 
     def initialize(value = nil, charset = 'utf-8')
       self.charset = charset
-      if Utilities.blank?(value)
+      if value.blank?
         value = ::DateTime.now.strftime('%a, %d %b %Y %H:%M:%S %z')
       else
         value = strip_field(FIELD_NAME, value)

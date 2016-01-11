@@ -10,7 +10,7 @@ module Mail
 
     def initialize(value = nil, charset = 'utf-8')
       self.charset = charset
-      if Utilities.blank?(value)
+      if value.blank?
         value = '1.0'
       end
       super(CAPITALIZED_FIELD, strip_field(FIELD_NAME, value), charset)
@@ -20,7 +20,7 @@ module Mail
     end
     
     def parse(val = value)
-      unless Utilities.blank?(val)
+      unless val.blank?
         @element = Mail::MimeVersionElement.new(val)
       end
     end

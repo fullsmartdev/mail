@@ -16,7 +16,7 @@ module Mail
     end
     
     def parse(val = value)
-      unless Utilities.blank?(val)
+      unless val.blank?
         @element = Mail::ContentLocationElement.new(val)
       end
     end

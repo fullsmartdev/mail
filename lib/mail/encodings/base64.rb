@@ -19,7 +19,7 @@ module Mail
     
       # Encode the string to Base64
       def self.encode(str)
-        ::Mail::Utilities.to_crlf(RubyVer.encode_base64( str ))
+        RubyVer.encode_base64( str ).to_crlf
       end
 
       # Base64 has a fixed cost, 4 bytes out per 3 bytes in

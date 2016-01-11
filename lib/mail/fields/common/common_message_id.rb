@@ -2,11 +2,11 @@
 module Mail
   module CommonMessageId # :nodoc:
     def element
-      @element ||= Mail::MessageIdsElement.new(value) unless Utilities.blank?(value)
+      @element ||= Mail::MessageIdsElement.new(value) unless value.blank?
     end
 
     def parse(val = value)
-      unless Utilities.blank?(val)
+      unless val.blank?
         @element = Mail::MessageIdsElement.new(val)
       else
         nil

@@ -5,7 +5,7 @@ module Mail::Parsers
     def parse(s)
       address_list = AddressListStruct.new([],[])
 
-      if Mail::Utilities.blank?(s)
+      if s.blank?
         return address_list
       end
 
