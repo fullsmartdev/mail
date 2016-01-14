@@ -70,7 +70,7 @@ module Mail
     end
 
     def do_decode
-      value.blank? ? nil : Encodings.decode_encode(value, :decode)
+      Utilities.blank?(value) ? nil : Encodings.decode_encode(value, :decode)
     end
 
     # 2.2.3. Long Header Fields
@@ -143,7 +143,7 @@ module Mail
       while !words.empty?
         limit = 78 - prepend
         limit = limit - 7 - encoding.length if should_encode
-        line = ""
+        line = String.new
         first_word = true
         while !words.empty?
           break unless word = words.first.dup
