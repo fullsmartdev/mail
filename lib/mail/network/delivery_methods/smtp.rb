@@ -88,8 +88,8 @@ module Mail
       :openssl_verify_mode  => nil,
       :ssl                  => nil,
       :tls                  => nil,
-      :open_timeout         => 5,
-      :read_timeout         => 5
+      :open_timeout         => nil,
+      :read_timeout         => nil
     }
 
     def initialize(values)
